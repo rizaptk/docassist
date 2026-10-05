@@ -54,13 +54,41 @@ function paintProvider() {
   if (p.keyUrl && !p.noKey) parts.push(`<a href="${p.keyUrl}" target="_blank">ambil key →</a>`);
   if (p.notes) parts.push(p.notes);
   h.innerHTML = parts.join(" · "); h.hidden = !parts.length;
+  refreshModelList(); // gabung daftar bawaan + hasil browse key user
+}
+
+// Browse model dari key user → isi datalist. Dijaga dari balapan + gagal diam-diam.
+let mdlSeq = 0;
+async function refreshModelList(force) {
+  const my = ++mdlSeq;
+  try {
+    const pid = $("sProvider").value;
+    const prov = provList.find((x) => x.id === pid);
+    if (!prov) return;
+    if (!prov.noKey && !S("docassist:key")) return; // belum ada key → jangan tembak 401
+    const ai = await lazyAI();
+    const { models, cached } = await ai.listModels(force);
+    if (my !== mdlSeq) return;
+    const seen = new Set(), dl = $("modelList"); dl.innerHTML = "";
+    for (const m of [...(prov.models || []), ...models]) {
+      if (!m || seen.has(m)) continue; seen.add(m);
+      const o = document.createElement("option"); o.value = m; dl.appendChild(o);
+    }
+    const h = $("sProvHint");
+    h.innerHTML += (h.innerHTML ? " · " : "") + `${models.length} model dari key${cached ? " (cache)" : ""} — klik kolom Model`;
+    h.hidden = false;
+    if (!$("sModel").value && prov.models?.[0]) $("sModel").value = prov.models[0];
+  } catch (e) {
+    if (/401|403|ditolak/i.test(e.message || "")) { const h = $("sProvHint"); h.textContent = "Key ditolak — periksa kembali."; h.hidden = false; }
+    // gagal lain (CORS/endpoint): diam, daftar bawaan tetap ada
+  }
 }
 function loadSettings() { // sinkron dulu (cat cepat), registry menyusul async
   $("sKey").value = S("docassist:key") || ""; $("sModel").value = S("docassist:model") || ""; $("sTemp").value = S("docassist:temp") || "0.3";
   refreshProviders().catch(() => {});
 }
 $("sProvider").onchange = () => { S("docassist:provider", $("sProvider").value); $("sModel").value = ""; paintProvider(); };
-$("sKey").onchange = () => S("docassist:key", $("sKey").value);
+$("sKey").onchange = () => { S("docassist:key", $("sKey").value); refreshModelList(); };
 $("sModel").onchange = () => S("docassist:model", $("sModel").value);
 $("sTemp").onchange = () => S("docassist:temp", $("sTemp").value);
 $("btnAddProv").onclick = async () => {
@@ -79,7 +107,7 @@ $("btnDelProv").onclick = async () => {
   await refreshProviders(); addMsg("sys", "Provider custom dihapus.");
 };
 $("btnWipe").onclick = () => { localStorage.removeItem("docassist:key"); $("sKey").value = ""; };
-$("btnTest").onclick = async () => { try { await (await lazyAI()).testConn(); addMsg("sys", "Koneksi OK."); } catch (e) { addMsg("sys", String(e.message)); } };
+$("btnTest").onclick = async () => { try { await (await lazyAI()).testConn(); addMsg("sys", "Koneksi OK."); refreshModelList(true); } catch (e) { addMsg("sys", String(e.message)); } };
 $("btnRefreshCtx").onclick = () => refreshCtx(true);
 
 // Badge cache.

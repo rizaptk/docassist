@@ -60,3 +60,22 @@ a.ok(all.some((p) => p.id === "openai"), "fallback preset saat offline");
 AI.deleteCustomProvider("custom-x");
 a.ok(!(await AI.getProviders()).some((p) => p.id === "custom-x"), "custom terhapus");
 console.log("smoke OK: registry provider — semua lolos");
+
+// listModels: normalisasi + filter non-chat + cache 24 jam (mock fetch).
+a.deepEqual(AI.filterChatModels(["chat-a", "text-embedding-x", "whisper-1", "chat-a"]), ["chat-a"]);
+let calls = 0;
+globalThis.fetch = async (url) => { calls++;
+  if (String(url).includes("/models?key="))
+    return { ok: true, json: async () => ({ models: [{ name: "models/gemini-x", supportedGenerationMethods: ["generateContent"] }, { name: "models/embed-y", supportedGenerationMethods: ["embedContent"] }] }) };
+  return { ok: true, json: async () => ({ data: [{ id: "chat-a" }, { id: "text-embedding-x" }] }) };
+};
+store["docassist:provider"] = "openai"; store["docassist:key"] = "k";
+const r1 = await AI.listModels();
+a.deepEqual(r1.models, ["chat-a"], "non-chat terfilter");
+a.equal(calls, 1);
+const r2 = await AI.listModels(); // cache: tanpa fetch ulang
+a.equal(r2.cached, true); a.equal(calls, 1);
+store["docassist:provider"] = "gemini";
+const r3 = await AI.listModels();
+a.deepEqual(r3.models, ["gemini-x"], "gemini filter generateContent");
+console.log("smoke OK: browse model dari key — semua lolos");

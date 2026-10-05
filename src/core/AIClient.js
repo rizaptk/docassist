@@ -125,3 +125,43 @@ export async function testConn() { // payload terkecil per gaya
   }
   if (!r.ok) throw new Error("Koneksi gagal (" + r.status + ")." + (r.status === 404 ? " Cek base URL provider." : "")); return true;
 }
+
+// Daftar model dari key user (browse available models). Cache 24 jam per provider.
+const LS_MODELS = "docassist:models:";
+const NON_CHAT = ["embed", "tts", "whisper", "dall-e", "moderation", "transcrib", "text-to-image", "audio"];
+export function filterChatModels(ids) {
+  return [...new Set(ids || [])].filter((id) => !NON_CHAT.some((b) => String(id).toLowerCase().includes(b)));
+}
+export async function listModels(force) {
+  const { p, k } = cfg();
+  const prov = await getProvider(p);
+  if (!prov.noKey && !k) throw new Error("Isi key dulu.");
+  const ck = LS_MODELS + prov.id;
+  if (!force) {
+    try { const c = JSON.parse(localStorage.getItem(ck) || "null");
+      if (c && Date.now() - c.at < 24 * 3600e3) return { models: c.models, cached: true };
+    } catch (e) {}
+  }
+  let ids = [];
+  if (prov.style === "gemini") {
+    const r = await fetch(`${base(prov)}/models?key=${encodeURIComponent(k)}`);
+    if (!r.ok) throw new Error("Key ditolak (" + r.status + ").");
+    const j = await r.json();
+    ids = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent"))
+      .map((m) => String(m.name || "").replace(/^models\//, ""));
+  } else if (prov.style === "anthropic") {
+    const r = await fetch(`${base(prov)}/v1/models`,
+      { headers: { "x-api-key": k, "anthropic-version": "2023-06-01" } });
+    if (!r.ok) throw new Error("Key ditolak (" + r.status + ").");
+    ids = ((await r.json()).data || []).map((m) => m.id);
+  } else { // openai-style: OpenAI, Groq, OpenRouter, HF, NVIDIA, Ollama, dsb.
+    const headers = { "Content-Type": "application/json" };
+    if (!prov.noKey) headers.Authorization = `Bearer ${k}`;
+    const r = await fetch(`${base(prov)}/models`, { headers });
+    if (!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "Key ditolak (" + r.status + ")." : "Daftar model gagal (" + r.status + ").");
+    ids = ((await r.json()).data || []).map((m) => m.id);
+  }
+  ids = filterChatModels(ids);
+  try { localStorage.setItem(ck, JSON.stringify({ at: Date.now(), models: ids })); } catch (e) {}
+  return { models: ids, cached: false };
+}

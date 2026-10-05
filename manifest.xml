@@ -30,7 +30,8 @@
     <AppDomain>https://cdn.jsdelivr.net</AppDomain>
   </AppDomains>
   <Hosts><Host Name="Document"/></Hosts>
-  <Requirements><Sets DefaultMinVersion="1.1"><Set Name="SharedRuntime" MinVersion="1.1"/><Set Name="WordApi" MinVersion="1.5"/></Sets></Requirements>
+  <!-- Lantai install: WordApi 1.1 agar bisa dipasang di Office 2016+. Fitur baru (komentar=1.4, shapes/PageSetup=Desktop) dibatasi saat runtime via isSetSupported/try-catch. SharedRuntime TIDAK wajib agar 2016/2019 bisa install; hide()/visibility auto-fallback ke collapse. -->
+  <Requirements><Sets DefaultMinVersion="1.1"><Set Name="WordApi" MinVersion="1.1"/></Sets></Requirements>
   <DefaultSettings><SourceLocation DefaultValue="https://rizaptk.github.io/docassist/src/taskpane/taskpane.html"/></DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes" xsi:type="VersionOverridesV1_0">

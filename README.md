@@ -75,6 +75,24 @@ Add-on MS Word ringan yang menjadi **asisten operasional dokumen**: format, buat
 
 Panduan instal detail: [`docs/PANDUAN_INSTALL.md`](./docs/PANDUAN_INSTALL.md)
 
+## 🖥️ Kompatibilitas Versi Word
+
+| Word | Status DocAssist | Catatan |
+|---|---|---|
+| Microsoft 365 (terkini) | ✅ Penuh | Semua 19 tools + shapes + page features |
+| Word Web / Mac / iPad | ✅ Penuh* | *Shapes natif & page-setup = Desktop saja (fallback otomatis) |
+| Office 2024 / 2021 retail | ✅ Penuh | Requirement sets terpenuhi |
+| Office 2021 LTSC | ⚠️ Sebagian | Core + visual jalan; shapes/pageSetup tergantung build |
+| Office 2019 / 2016 | ⚠️ Inti jalan | Chat, tabel, gambar, CV, OOXML, cache (WordApi 1.1–1.3). Nonaktif otomatis: komentar (butuh 1.4), shapes/PageSetup (butuh Desktop set) |
+
+Manifest memakai lantai `WordApi 1.1` (tanpa SharedRuntime wajib) agar bisa dipasang di Office 2016+. Semua fitur di atas lantai itu dibatasi saat runtime (`isSetSupported` + `try/catch` + fallback collapse) — add-in tidak crash di versi lama, hanya fiturnya yang nonaktif dengan pesan jujur.
+
+> **Perlu install WordApi? Tidak.** `WordApi`/Office.js dimuat otomatis dari CDN Microsoft
+> (`appsforoffice.microsoft.com`) setiap panel dibuka — selalu versi terbaru, tanpa install/update
+> manual. Versi Word user yang menentukan API mana yang aktif. Yang manual hanya sideload
+> `manifest.xml` kita (sekali per perangkat, sampai dipublish ke Marketplace). DocAssist butuh
+> internet (CDN + API AI + hosting); Word-nya sendiri tetap jalan offline.
+
 ## 🏗️ Arsitektur
 
 ```

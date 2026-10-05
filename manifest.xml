@@ -16,6 +16,7 @@
     <AppDomain>https://~HOST~</AppDomain>
     <AppDomain>https://api.openai.com</AppDomain>
     <AppDomain>https://generativelanguage.googleapis.com</AppDomain>
+    <AppDomain>https://cdn.jsdelivr.net</AppDomain>
   </AppDomains>
   <Hosts><Host Name="Document"/></Hosts>
   <Requirements><Sets DefaultMinVersion="1.1"><Set Name="SharedRuntime" MinVersion="1.1"/><Set Name="WordApi" MinVersion="1.5"/></Sets></Requirements>

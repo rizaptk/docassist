@@ -28,10 +28,13 @@
       <button data-q="Lanjutkan 2 paragraf dengan nada yang sama.">Lanjutkan</button>
       <button data-q="Buatkan tabel 3x3 rapi dari teks ini.">Tabel</button>
       <button data-q="Formal-kan tanpa ubah makna.">Formal</button>
+      <button data-prefill="Buatkan flowchart dari alur berikut: ">Flowchart</button>
+      <button data-prefill="Buatkan chart dari data berikut (paste tabel/angka): ">Chart</button>
     </div>
     <div id="msgs" aria-live="polite"></div>
     <div id="diffBox" hidden>
       <div class="diff-h">Pratinjau perubahan <span><button id="btnApply">Terapkan</button><button id="btnDiscard">Batal</button></span></div>
+      <img id="diffImg" hidden alt="pratinjau visual"/>
       <div class="diff-c"><div><h6>Sebelum</h6><pre id="diffBefore"></pre></div><div><h6>Sesudah</h6><pre id="diffAfter"></pre></div></div>
     </div>
     <form id="form"><input id="input" placeholder="Perintah operasional…" autocomplete="off"/><button>➤</button></form>

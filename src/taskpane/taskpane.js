@@ -5,8 +5,9 @@ import { eksekusiOps, bacaMeta, bacaJendela } from "../core/WordOps.js";
 
 const $ = (id) => document.getElementById(id);
 const msgs = $("msgs"), badge = $("cacheBadge");
-let manifest = null, pendingOps = null, busy = false, aiMod = null;
+let manifest = null, pendingOps = null, busy = false, aiMod = null, visMod = null;
 const lazyAI = () => aiMod || import("../core/AIClient.js").then((m) => (aiMod = m));
+const lazyVis = () => visMod || import("../core/Visuals.js").then((m) => (visMod = m));
 
 // Render: cap 50 bubble terakhir (hemat DOM), throttle streaming via rAF.
 let rafQ = "", rafOn = false;
@@ -23,7 +24,10 @@ $("btnCollapse").onclick = () => $("app").classList.add("collapsed");
 $("btnExpand").onclick = () => $("app").classList.remove("collapsed");
 $("btnHide").onclick = async () => { try { await Office.addin.hide(); } catch (e) { $("app").classList.add("collapsed"); } };
 $("btnSettings").onclick = () => { const s = $("settings"); s.hidden = !s.hidden; };
-document.querySelectorAll("#chips button").forEach((b) => (b.onclick = () => { $("input").value = b.dataset.q; $("form").requestSubmit(); }));
+document.querySelectorAll("#chips button").forEach((b) => (b.onclick = () => {
+  if (b.dataset.prefill) { $("input").value = b.dataset.prefill; $("input").focus(); } // visual: user lanjutkan ketik/paste
+  else { $("input").value = b.dataset.q; $("form").requestSubmit(); }
+}));
 
 // Settings BYOK (sinkron lokal, tanpa network).
 const S = (k, v) => v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v);
@@ -61,13 +65,39 @@ $("form").onsubmit = async (e) => {
     thinking.textContent = res.alasan_singkat || "Siap.";
     if (res.preview) { $("diffBefore").textContent = (ctx.l1.seleksi || "(kosong)").slice(0, 600); $("diffAfter").textContent = res.preview.slice(0, 600); $("diffBox").hidden = false; }
     pendingOps = res.ops || [];
+    // Visual (flowchart/chart): render dulu untuk pratinjau, sisip saat Terapkan.
+    const vis = pendingOps.filter((o) => o.tool === "buat_flowchart" || o.tool === "buat_chart");
+    if (vis.length) {
+      thinking.textContent = "Merender visual…";
+      const V = await lazyVis();
+      for (const op of vis) {
+        try {
+          if (op.tool === "buat_flowchart") {
+            op._png = (await V.renderMermaidPNG(op.mermaid || "graph TD;A-->B")).split(",")[1];
+            op.caption = op.caption || "Flowchart";
+          } else {
+            const t = V.parseDataTable(op.data || ctx.l1.seleksi || "");
+            const png = V.renderChartPNG({ title: op.title || "Chart", type: op.chartType || "bar",
+              headers: op.headers || t?.headers || ["", "Nilai"], rows: op.rows || t?.rows || [] });
+            op._png = png.split(",")[1]; op.caption = op.title || "Chart";
+          }
+        } catch (err) { addMsg("sys", "Visual gagal: " + err.message + " — dilewati."); op._png = null; }
+      }
+      const first = vis.find((v) => v._png);
+      if (first) {
+        const img = $("diffImg"); img.src = "data:image/png;base64," + first._png; img.hidden = false;
+        $("diffAfter").textContent = (first.caption || "visual") + " — cek gambar di atas, Terapkan untuk sisip.";
+        $("diffBox").hidden = false;
+      }
+      thinking.textContent = res.alasan_singkat || "Visual siap dipratinjau.";
+    }
     if (!pendingOps.length && res.preview) pendingOps = [{ tool: "tulis_ganti", teks: res.preview }];
     if (pendingOps.length && !res.preview) { await eksekusiOps(pendingOps); pendingOps = null; addMsg("sys", "Diterapkan langsung (aksi kecil)."); }
   } catch (err) { thinking.textContent = "Gagal: " + err.message; }
   busy = false;
 };
-$("btnApply").onclick = async () => { if (pendingOps) await eksekusiOps(pendingOps); pendingOps = null; $("diffBox").hidden = true; addMsg("sys", "Diterapkan. Ctrl+Z untuk batal."); };
-$("btnDiscard").onclick = () => { pendingOps = null; $("diffBox").hidden = true; };
+$("btnApply").onclick = async () => { if (pendingOps) await eksekusiOps(pendingOps); pendingOps = null; $("diffBox").hidden = true; $("diffImg").hidden = true; addMsg("sys", "Diterapkan. Ctrl+Z untuk batal."); };
+$("btnDiscard").onclick = () => { pendingOps = null; $("diffBox").hidden = true; $("diffImg").hidden = true; };
 
 // Pause background saat pane hidden (jangan ganggu Word).
 let idleT = null;

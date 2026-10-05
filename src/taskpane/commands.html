@@ -1,0 +1,8 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head><body><script>
+/* FunctionFile untuk ribbon ExecuteFunction. Tetap ringan: tanpa DOM. */
+Office.onReady(()=>{});
+async function toggleCollapse(){ try{ await Office.addin.showAsTaskpane(); }catch(e){} }
+if(typeof Office!=="undefined") Office.actions && Office.actions.associate("toggleCollapse", toggleCollapse);
+</script></body></html>

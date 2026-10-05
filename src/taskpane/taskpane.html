@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>DocAssist</title>
+<link rel="stylesheet" href="./taskpane.css"/>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body>
+<div id="app" class="expanded">
+  <!-- Strip mode: tidak intrusif, 48px -->
+  <div id="rail" title="DocAssist — klik untuk buka">
+    <button id="btnExpand" aria-label="Buka asisten">🤖</button>
+    <button id="btnHide" aria-label="Sembunyikan panel">×</button>
+  </div>
+  <!-- Full widget 330px -->
+  <div id="pane">
+    <header id="hdr">
+      <span id="logo">🤖 DocAssist</span>
+      <span id="cacheBadge" title="Status cache konteks">…</span>
+      <span class="sp"></span>
+      <button id="btnCollapse" title="Lipat jadi strip (tidak mengganggu)">–</button>
+      <button id="btnSettings" title="Pengaturan AI">⚙</button>
+    </header>
+    <div id="chips">
+      <button data-q="Rapikan paragraf ini, pertahankan istilah teknis.">Rapikan</button>
+      <button data-q="Lanjutkan 2 paragraf dengan nada yang sama.">Lanjutkan</button>
+      <button data-q="Buatkan tabel 3x3 rapi dari teks ini.">Tabel</button>
+      <button data-q="Formal-kan tanpa ubah makna.">Formal</button>
+    </div>
+    <div id="msgs" aria-live="polite"></div>
+    <div id="diffBox" hidden>
+      <div class="diff-h">Pratinjau perubahan <span><button id="btnApply">Terapkan</button><button id="btnDiscard">Batal</button></span></div>
+      <div class="diff-c"><div><h6>Sebelum</h6><pre id="diffBefore"></pre></div><div><h6>Sesudah</h6><pre id="diffAfter"></pre></div></div>
+    </div>
+    <form id="form"><input id="input" placeholder="Perintah operasional…" autocomplete="off"/><button>➤</button></form>
+    <div id="settings" hidden>
+      <label>Provider <select id="sProvider"><option value="openai">OpenAI</option><option value="gemini">Gemini</option></select></label>
+      <label>API key (BYOK, lokal saja) <input id="sKey" type="password" placeholder="sk-… / AIza…"/></label>
+      <label>Model <select id="sModel"><option>gpt-4o-mini</option><option>gpt-4o</option><option>gemini-2.0-flash</option><option>gemini-1.5-pro</option></select></label>
+      <label>Suhu <input id="sTemp" type="range" min="0" max="1" step="0.1" value="0.3"/></label>
+      <div class="s-row"><button type="button" id="btnTest">Test</button><button type="button" id="btnWipe">Hapus key</button><button type="button" id="btnRefreshCtx">Refresh konteks</button></div>
+      <p class="warn">Key tersimpan lokal di perangkat ini. Enterprise → gunakan backend proxy.</p>
+    </div>
+  </div>
+</div>
+<script type="module" src="./taskpane.js"></script>
+</body>
+</html>

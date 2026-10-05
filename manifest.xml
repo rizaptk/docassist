@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DocAssist — Add-in only manifest, sideload manual. Ganti ~HOST~ dengan URL hosting statis kamu. -->
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:type="TaskPaneApp">
+  <Id>7b6e2a10-docassist-4c8a-9f01-000000000001</Id>
+  <Version>0.1.0</Version>
+  <ProviderName>DocAssist</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="DocAssist AI"/>
+  <Description DefaultValue="Asisten operasional Word: format/edit/tambah/desain via chat widget ringan (BYOK OpenAI+Gemini)."/>
+  <IconUrl DefaultValue="https://~HOST~/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://~HOST~/assets/icon-80.png"/>
+  <SupportUrl DefaultValue="https://~HOST~/docs/PANDUAN_INSTALL.html"/>
+  <AppDomains>
+    <AppDomain>https://~HOST~</AppDomain>
+    <AppDomain>https://api.openai.com</AppDomain>
+    <AppDomain>https://generativelanguage.googleapis.com</AppDomain>
+  </AppDomains>
+  <Hosts><Host Name="Document"/></Hosts>
+  <Requirements><Sets DefaultMinVersion="1.1"><Set Name="SharedRuntime" MinVersion="1.1"/><Set Name="WordApi" MinVersion="1.5"/></Sets></Requirements>
+  <DefaultSettings><SourceLocation DefaultValue="https://~HOST~/src/taskpane/taskpane.html"/></DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts><Host xsi:type="Document">
+      <DesktopFormFactor>
+        <GetStarted><Title resid="GetStarted.Title"/><Description resid="GetStarted.Desc"/><LearnMoreUrl resid="GetStarted.Url"/></GetStarted>
+        <FunctionFile resid="Commands.Url"/>
+        <ExtensionPoint xsi:type="PrimaryCommandSurface">
+          <OfficeTab id="TabHome"><Group id="DocAssist.Group">
+            <Label resid="Group.Label"/>
+            <Control xsi:type="Button" id="DocAssist.Toggle">
+              <Label resid="Toggle.Label"/><Supertip><Title resid="Toggle.Title"/><Description resid="Toggle.Desc"/></Supertip>
+              <Icon><bt:Image size="16" resid="Icon.16"/><bt:Image size="32" resid="Icon.32"/><bt:Image size="80" resid="Icon.80"/></Icon>
+              <Action xsi:type="ShowTaskpane"><TaskpaneId>DocAssistPane</TaskpaneId><SourceLocation resid="Pane.Url"/></Action>
+            </Control>
+            <Control xsi:type="Button" id="DocAssist.Collapse">
+              <Label resid="Collapse.Label"/><Supertip><Title resid="Collapse.Title"/><Description resid="Collapse.Desc"/></Supertip>
+              <Icon><bt:Image size="16" resid="Icon.16"/><bt:Image size="32" resid="Icon.32"/><bt:Image size="80" resid="Icon.80"/></Icon>
+              <Action xsi:type="ExecuteFunction"><FunctionName>toggleCollapse</FunctionName></Action>
+            </Control>
+          </Group></OfficeTab>
+        </ExtensionPoint>
+      </DesktopFormFactor>
+    </Host></Hosts>
+    <Resources>
+      <bt:Images xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
+        <bt:Image id="Icon.16" DefaultValue="https://~HOST~/assets/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="https://~HOST~/assets/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="https://~HOST~/assets/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
+        <bt:Url id="Pane.Url" DefaultValue="https://~HOST~/src/taskpane/taskpane.html"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://~HOST~/src/taskpane/commands.html"/>
+        <bt:Url id="GetStarted.Url" DefaultValue="https://~HOST~/docs/PANDUAN_INSTALL.html"/>
+      </bt:Urls>
+      <bt:ShortStrings xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
+        <bt:String id="GetStarted.Title" DefaultValue="DocAssist siap."/>
+        <bt:String id="Group.Label" DefaultValue="DocAssist"/>
+        <bt:String id="Toggle.Label" DefaultValue="AI Asisten"/>
+        <bt:String id="Collapse.Label" DefaultValue="Ringkas"/>
+        <bt:String id="Toggle.Title" DefaultValue="Buka/tutup asisten AI"/>
+        <bt:String id="Collapse.Title" DefaultValue="Mode strip hemat tempat"/>
+      </bt:ShortStrings>
+      <bt:LongStrings xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
+        <bt:String id="GetStarted.Desc" DefaultValue="Chat widget ringan, tidak mengganggu dokumen."/>
+        <bt:String id="Toggle.Desc" DefaultValue="Tampilkan panel chat 330px yang bisa dilipat."/>
+        <bt:String id="Collapse.Desc" DefaultValue="Lipat jadi strip ikon agar tidak intrusif."/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

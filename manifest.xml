@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- DocAssist — Add-in only manifest, sideload manual. Ganti ~HOST~ dengan URL hosting statis kamu. -->
+<!-- DocAssist — Add-in only manifest, sideload manual. Ganti rizaptk.github.io/docassist dengan URL hosting statis kamu. -->
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:type="TaskPaneApp">
@@ -9,11 +9,11 @@
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="DocAssist AI"/>
   <Description DefaultValue="Asisten operasional Word: format/edit/tambah/desain via chat widget ringan (BYOK OpenAI+Gemini)."/>
-  <IconUrl DefaultValue="https://~HOST~/assets/icon-32.png"/>
-  <HighResolutionIconUrl DefaultValue="https://~HOST~/assets/icon-80.png"/>
-  <SupportUrl DefaultValue="https://~HOST~/docs/PANDUAN_INSTALL.html"/>
+  <IconUrl DefaultValue="https://rizaptk.github.io/docassist/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://rizaptk.github.io/docassist/assets/icon-80.png"/>
+  <SupportUrl DefaultValue="https://rizaptk.github.io/docassist/docs/PANDUAN_INSTALL.html"/>
   <AppDomains>
-    <AppDomain>https://~HOST~</AppDomain>
+    <AppDomain>https://rizaptk.github.io/docassist</AppDomain>
     <AppDomain>https://api.openai.com</AppDomain>
     <AppDomain>https://generativelanguage.googleapis.com</AppDomain>
     <AppDomain>https://api.groq.com</AppDomain>
@@ -31,9 +31,9 @@
   </AppDomains>
   <Hosts><Host Name="Document"/></Hosts>
   <Requirements><Sets DefaultMinVersion="1.1"><Set Name="SharedRuntime" MinVersion="1.1"/><Set Name="WordApi" MinVersion="1.5"/></Sets></Requirements>
-  <DefaultSettings><SourceLocation DefaultValue="https://~HOST~/src/taskpane/taskpane.html"/></DefaultSettings>
+  <DefaultSettings><SourceLocation DefaultValue="https://rizaptk.github.io/docassist/src/taskpane/taskpane.html"/></DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes" xsi:type="VersionOverridesV1_0">
     <Hosts><Host xsi:type="Document">
       <DesktopFormFactor>
         <GetStarted><Title resid="GetStarted.Title"/><Description resid="GetStarted.Desc"/><LearnMoreUrl resid="GetStarted.Url"/></GetStarted>
@@ -57,14 +57,14 @@
     </Host></Hosts>
     <Resources>
       <bt:Images xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
-        <bt:Image id="Icon.16" DefaultValue="https://~HOST~/assets/icon-16.png"/>
-        <bt:Image id="Icon.32" DefaultValue="https://~HOST~/assets/icon-32.png"/>
-        <bt:Image id="Icon.80" DefaultValue="https://~HOST~/assets/icon-80.png"/>
+        <bt:Image id="Icon.16" DefaultValue="https://rizaptk.github.io/docassist/assets/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="https://rizaptk.github.io/docassist/assets/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="https://rizaptk.github.io/docassist/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
-        <bt:Url id="Pane.Url" DefaultValue="https://~HOST~/src/taskpane/taskpane.html"/>
-        <bt:Url id="Commands.Url" DefaultValue="https://~HOST~/src/taskpane/commands.html"/>
-        <bt:Url id="GetStarted.Url" DefaultValue="https://~HOST~/docs/PANDUAN_INSTALL.html"/>
+        <bt:Url id="Pane.Url" DefaultValue="https://rizaptk.github.io/docassist/src/taskpane/taskpane.html"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://rizaptk.github.io/docassist/src/taskpane/commands.html"/>
+        <bt:Url id="GetStarted.Url" DefaultValue="https://rizaptk.github.io/docassist/docs/PANDUAN_INSTALL.html"/>
       </bt:Urls>
       <bt:ShortStrings xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
         <bt:String id="GetStarted.Title" DefaultValue="DocAssist siap."/>

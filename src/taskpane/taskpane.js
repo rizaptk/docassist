@@ -29,13 +29,55 @@ document.querySelectorAll("#chips button").forEach((b) => (b.onclick = () => {
   else { $("input").value = b.dataset.q; $("form").requestSubmit(); }
 }));
 
-// Settings BYOK (sinkron lokal, tanpa network).
+// Settings BYOK + registry provider dinamis (config/providers.json + custom lokal).
 const S = (k, v) => v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v);
-function loadSettings() { $("sProvider").value = S("docassist:provider") || "openai"; $("sKey").value = S("docassist:key") || "";
-  $("sModel").value = S("docassist:model") || "gpt-4o-mini"; $("sTemp").value = S("docassist:temp") || "0.3"; }
-["sProvider", "sKey", "sModel", "sTemp"].forEach((id) => $(id).onchange = () =>
-  { S("docassist:provider", $("sProvider").value); S("docassist:key", $("sKey").value);
-    S("docassist:model", $("sModel").value); S("docassist:temp", $("sTemp").value); });
+let provList = [];
+async function refreshProviders() {
+  const ai = await lazyAI();
+  provList = await ai.getProviders();
+  const sel = $("sProvider"), cur = S("docassist:provider") || "openai";
+  sel.innerHTML = "";
+  for (const p of provList) { const o = document.createElement("option"); o.value = p.id; o.textContent = p.label + (p.custom ? " ✎" : ""); sel.appendChild(o); }
+  sel.value = provList.some((p) => p.id === cur) ? cur : provList[0].id;
+  paintProvider();
+}
+function paintProvider() {
+  const p = provList.find((x) => x.id === $("sProvider").value) || provList[0];
+  if (!p) return;
+  const dl = $("modelList"); dl.innerHTML = "";
+  for (const m of p.models || []) { const o = document.createElement("option"); o.value = m; dl.appendChild(o); }
+  if (!$("sModel").value) $("sModel").value = (p.models || [""])[0] || "";
+  $("sKey").placeholder = p.keyPlaceholder || "tempel key…";
+  $("keyRow").style.display = p.noKey ? "none" : "";
+  const h = $("sProvHint");
+  const parts = [];
+  if (p.keyUrl && !p.noKey) parts.push(`<a href="${p.keyUrl}" target="_blank">ambil key →</a>`);
+  if (p.notes) parts.push(p.notes);
+  h.innerHTML = parts.join(" · "); h.hidden = !parts.length;
+}
+function loadSettings() { // sinkron dulu (cat cepat), registry menyusul async
+  $("sKey").value = S("docassist:key") || ""; $("sModel").value = S("docassist:model") || ""; $("sTemp").value = S("docassist:temp") || "0.3";
+  refreshProviders().catch(() => {});
+}
+$("sProvider").onchange = () => { S("docassist:provider", $("sProvider").value); $("sModel").value = ""; paintProvider(); };
+$("sKey").onchange = () => S("docassist:key", $("sKey").value);
+$("sModel").onchange = () => S("docassist:model", $("sModel").value);
+$("sTemp").onchange = () => S("docassist:temp", $("sTemp").value);
+$("btnAddProv").onclick = async () => {
+  const name = $("cName").value.trim(), base = $("cBase").value.trim().replace(/\/+$/, "");
+  if (!name || !/^https?:\/\/.+\..+/.test(base)) { addMsg("sys", "Nama + base URL https tidak valid."); return; }
+  const id = "custom-" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 24);
+  (await lazyAI()).saveCustomProvider({ id, label: name, style: $("cStyle").value, baseUrl: base,
+    models: [$("cModel").value.trim() || "default"], custom: true });
+  S("docassist:provider", id); $("sModel").value = ""; $("cName").value = $("cBase").value = $("cModel").value = "";
+  await refreshProviders(); addMsg("sys", "Provider '" + name + "' tersimpan di perangkat ini.");
+};
+$("btnDelProv").onclick = async () => {
+  const id = $("sProvider").value, ai = await lazyAI();
+  if (!provList.find((p) => p.id === id)?.custom) { addMsg("sys", "Hanya provider custom (✎) yang bisa dihapus."); return; }
+  ai.deleteCustomProvider(id); S("docassist:provider", "openai"); $("sModel").value = "";
+  await refreshProviders(); addMsg("sys", "Provider custom dihapus.");
+};
 $("btnWipe").onclick = () => { localStorage.removeItem("docassist:key"); $("sKey").value = ""; };
 $("btnTest").onclick = async () => { try { await (await lazyAI()).testConn(); addMsg("sys", "Koneksi OK."); } catch (e) { addMsg("sys", String(e.message)); } };
 $("btnRefreshCtx").onclick = () => refreshCtx(true);
@@ -66,7 +108,8 @@ $("form").onsubmit = async (e) => {
     if (res.preview) { $("diffBefore").textContent = (ctx.l1.seleksi || "(kosong)").slice(0, 600); $("diffAfter").textContent = res.preview.slice(0, 600); $("diffBox").hidden = false; }
     pendingOps = res.ops || [];
     // Visual (flowchart/chart): render dulu untuk pratinjau, sisip saat Terapkan.
-    const vis = pendingOps.filter((o) => o.tool === "buat_flowchart" || o.tool === "buat_chart");
+    // Flowchart native: pratinjau = render mermaid dari nodes/edges; yang disisip = shapes editable.
+    const vis = pendingOps.filter((o) => o.tool === "buat_flowchart" || o.tool === "buat_chart" || o.tool === "buat_flowchart_native");
     if (vis.length) {
       thinking.textContent = "Merender visual…";
       const V = await lazyVis();
@@ -75,6 +118,12 @@ $("form").onsubmit = async (e) => {
           if (op.tool === "buat_flowchart") {
             op._png = (await V.renderMermaidPNG(op.mermaid || "graph TD;A-->B")).split(",")[1];
             op.caption = op.caption || "Flowchart";
+          } else if (op.tool === "buat_flowchart_native") {
+            const F = await import("../core/FlowchartOoxml.js");
+            const flow = { nodes: op.nodes || [], edges: op.edges || [] };
+            op._ooxml = F.buildFlowchartOoxml(flow); // siap sisip saat Terapkan
+            op._png = (await V.renderMermaidPNG(F.flowToMermaid(flow))).split(",")[1]; // pratinjau
+            op.caption = op.caption || "Flowchart (editable di Word)";
           } else {
             const t = V.parseDataTable(op.data || ctx.l1.seleksi || "");
             const png = V.renderChartPNG({ title: op.title || "Chart", type: op.chartType || "bar",

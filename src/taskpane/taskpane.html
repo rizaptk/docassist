@@ -28,7 +28,7 @@
       <button data-q="Lanjutkan 2 paragraf dengan nada yang sama.">Lanjutkan</button>
       <button data-q="Buatkan tabel 3x3 rapi dari teks ini.">Tabel</button>
       <button data-q="Formal-kan tanpa ubah makna.">Formal</button>
-      <button data-prefill="Buatkan flowchart dari alur berikut: ">Flowchart</button>
+      <button data-prefill="Buatkan flowchart yang bisa diedit dari alur berikut: ">Flowchart ✎</button>
       <button data-prefill="Buatkan chart dari data berikut (paste tabel/angka): ">Chart</button>
     </div>
     <div id="msgs" aria-live="polite"></div>
@@ -39,12 +39,20 @@
     </div>
     <form id="form"><input id="input" placeholder="Perintah operasional…" autocomplete="off"/><button>➤</button></form>
     <div id="settings" hidden>
-      <label>Provider <select id="sProvider"><option value="openai">OpenAI</option><option value="gemini">Gemini</option></select></label>
-      <label>API key (BYOK, lokal saja) <input id="sKey" type="password" placeholder="sk-… / AIza…"/></label>
-      <label>Model <select id="sModel"><option>gpt-4o-mini</option><option>gpt-4o</option><option>gemini-2.0-flash</option><option>gemini-1.5-pro</option></select></label>
+      <label>Provider <select id="sProvider"></select></label>
+      <p class="hint" id="sProvHint" hidden></p>
+      <label id="keyRow">API key (BYOK, lokal saja) <input id="sKey" type="password" placeholder="…"/></label>
+      <label>Model <input id="sModel" list="modelList" placeholder="ketik / pilih model"/><datalist id="modelList"></datalist></label>
       <label>Suhu <input id="sTemp" type="range" min="0" max="1" step="0.1" value="0.3"/></label>
       <div class="s-row"><button type="button" id="btnTest">Test</button><button type="button" id="btnWipe">Hapus key</button><button type="button" id="btnRefreshCtx">Refresh konteks</button></div>
-      <p class="warn">Key tersimpan lokal di perangkat ini. Enterprise → gunakan backend proxy.</p>
+      <details id="addProv"><summary>+ Provider lain</summary>
+        <label>Nama <input id="cName" placeholder="cth: Server Kantor"/></label>
+        <label>Base URL <input id="cBase" placeholder="https://…/v1"/></label>
+        <label>Gaya API <select id="cStyle"><option value="openai">OpenAI-compatible</option><option value="gemini">Gemini</option><option value="anthropic">Anthropic</option></select></label>
+        <label>Model awal <input id="cModel" placeholder="nama-model"/></label>
+        <div class="s-row"><button type="button" id="btnAddProv">Simpan</button><button type="button" id="btnDelProv">Hapus yg aktif</button></div>
+      </details>
+      <p class="warn">Daftar bawaan dari <code>config/providers.json</code> (ikut git). Key tersimpan lokal di perangkat ini.</p>
     </div>
   </div>
 </div>

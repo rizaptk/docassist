@@ -1,0 +1,124 @@
+{
+  "_comment": "DocAssist provider registry — FILE KHUSUS persistence daftar provider AI. Admin/user boleh edit manual (tambah provider OpenAI-compatible cukup 5 baris), commit ke git, user lain otomatis dapat daftarnya. Custom per-perangkat via UI disimpan di localStorage dan digabung saat runtime. style: openai = POST {baseUrl}{chatPath||/chat/completions} (Bearer/SSE); gemini = POST {baseUrl}/models/{model}:generateContent?key=; anthropic = POST {baseUrl}/v1/messages (x-api-key). Riset batas gratis: Okt 2026, ringkas di notes tiap provider; daftar model :free berputar — user bisa ketik ID baru langsung di kolom Model.",
+  "version": 2,
+  "providers": [
+    {
+      "id": "openai",
+      "label": "OpenAI (berbayar)",
+      "style": "openai",
+      "baseUrl": "https://api.openai.com/v1",
+      "models": ["gpt-4o-mini", "gpt-4o"],
+      "keyUrl": "https://platform.openai.com/api-keys",
+      "keyPlaceholder": "sk-…",
+      "notes": "Tidak ada tier gratis permanen yang terkonfirmasi."
+    },
+    {
+      "id": "gemini",
+      "label": "Google Gemini (gratis)",
+      "style": "gemini",
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+      "models": ["gemini-2.0-flash", "gemini-2.5-flash"],
+      "keyUrl": "https://aistudio.google.com/apikey",
+      "keyPlaceholder": "AIza…",
+      "notes": "Gratis tanpa kartu (±1500 req/hari, 10 RPM). Rekomendasi utama gratis."
+    },
+    {
+      "id": "groq",
+      "label": "Groq (gratis, cepat)",
+      "style": "openai",
+      "baseUrl": "https://api.groq.com/openai/v1",
+      "models": ["llama-3.3-70b-versatile", "openai/gpt-oss-20b", "openai/gpt-oss-120b"],
+      "keyUrl": "https://console.groq.com/keys",
+      "keyPlaceholder": "gsk_…",
+      "notes": "Gratis tanpa kartu (±30 RPM, ±1K req/hari per model). CORS terbuka — bisa dari browser."
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter :free (gratis)",
+      "style": "openai",
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "models": ["openrouter/free", "qwen/qwen3.8-27b:free", "google/gemma-4-31b-it:free", "thinkingmachines/inkling-small:free", "nvidia/nemotron-3.5-lightning:free", "cohere/north-mini-code:free"],
+      "keyUrl": "https://openrouter.ai/keys",
+      "keyPlaceholder": "sk-or-…",
+      "notes": "Model :free $0/token, tanpa kartu. Batas 20 RPM + 50 req/hari (1000/hari bila pernah beli $10 kredit). Daftar berputar; openrouter/free = router otomatis."
+    },
+    {
+      "id": "cerebras",
+      "label": "Cerebras (gratis, kuota besar)",
+      "style": "openai",
+      "baseUrl": "https://api.cerebras.ai/v1",
+      "models": ["gpt-oss-120b"],
+      "keyUrl": "https://inference.cerebras.ai/",
+      "keyPlaceholder": "csk-…",
+      "notes": "Klaim ±1Jt token/hari, 30 RPM. Cek ketentuan terbaru — dok resmi menyebut perlu payment terverifikasi untuk aktivasi API."
+    },
+    {
+      "id": "mistral",
+      "label": "Mistral (mode gratis)",
+      "style": "openai",
+      "baseUrl": "https://api.mistral.ai/v1",
+      "models": ["mistral-small-latest", "mistral-large-latest"],
+      "keyUrl": "https://console.mistral.ai/api-keys/",
+      "keyPlaceholder": "…",
+      "notes": "Free mode untuk evaluasi (verifikasi HP, tanpa kartu). Batas per-workspace, cek dashboard."
+    },
+    {
+      "id": "huggingface",
+      "label": "Hugging Face (gratis)",
+      "style": "openai",
+      "baseUrl": "https://router.huggingface.co/v1",
+      "models": ["meta-llama/Llama-3.1-8B-Instruct", "deepseek-ai/DeepSeek-V3-0324", "openai/gpt-oss-120b:fastest"],
+      "keyUrl": "https://huggingface.co/settings/tokens",
+      "keyPlaceholder": "hf_…",
+      "notes": "Butuh token HF (permission Inference Providers). Format model bisa provider:model:policy — cek docs HF terbaru."
+    },
+    {
+      "id": "nvidia",
+      "label": "NVIDIA NIM (gratis)",
+      "style": "openai",
+      "baseUrl": "https://integrate.api.nvidia.com/v1",
+      "models": ["nvidia/nemotron-3-nano-30b-a3b", "openai/gpt-oss-20b", "nvidia/llama-3.3-nemotron-super-49b-v1"],
+      "keyUrl": "https://build.nvidia.com/settings",
+      "keyPlaceholder": "nvapi-…",
+      "notes": "Gratis tanpa kartu (±40 RPM, tanpa kuota harian). Model resmi tapi tidak secepat Groq/Cerebras; daftar 180+ model cek GET /v1/models."
+    },
+    {
+      "id": "pollinations",
+      "label": "Pollinations (gratis, tanpa daftar)",
+      "style": "openai",
+      "baseUrl": "https://text.pollinations.ai",
+      "chatPath": "/openai",
+      "noKey": true,
+      "models": ["openai", "mistral"],
+      "notes": "Tanpa daftar/key. Anonim ±1 req/15 dtk (lambat, untuk darurat). Jangan kirim data sensitif."
+    },
+    {
+      "id": "deepseek",
+      "label": "DeepSeek (murah)",
+      "style": "openai",
+      "baseUrl": "https://api.deepseek.com/v1",
+      "models": ["deepseek-chat", "deepseek-reasoner"],
+      "keyUrl": "https://platform.deepseek.com/api_keys",
+      "keyPlaceholder": "sk-…",
+      "notes": "Berbayar tapi sangat murah. Bukan gratis."
+    },
+    {
+      "id": "anthropic",
+      "label": "Anthropic Claude (berbayar)",
+      "style": "anthropic",
+      "baseUrl": "https://api.anthropic.com",
+      "models": ["claude-3-5-haiku-latest", "claude-3-5-sonnet-latest"],
+      "keyUrl": "https://console.anthropic.com/",
+      "keyPlaceholder": "sk-ant-…"
+    },
+    {
+      "id": "ollama",
+      "label": "Ollama (Lokal, gratis)",
+      "style": "openai",
+      "baseUrl": "http://localhost:11434/v1",
+      "noKey": true,
+      "models": ["llama3.1", "qwen2.5"],
+      "notes": "Tanpa key, tanpa biaya, data tidak keluar. Word Desktop; Word Web bisa kena mixed-content block."
+    }
+  ]
+}

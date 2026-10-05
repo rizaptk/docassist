@@ -1,4 +1,4 @@
-/* WordOps — 15 tools atomik. Prinsip perf: 1 Word.run per aksi, load properti minimal, walk ±3 paragraf (tanpa load seluruh body). */
+/* WordOps — 16 tools atomik. Prinsip perf: 1 Word.run per aksi, load properti minimal, walk ±3 paragraf (tanpa load seluruh body). */
 async function run(fn) { return Word.run(fn); }
 async function tryCatch(fn, onErr) { try { return await fn(); } catch (e) { onErr && onErr(e); console.error("[DocAssist]", e); return null; } }
 
@@ -37,7 +37,7 @@ export async function bacaMeta() {
     await ctx.sync();
     for (let i = 0; i < cap; i++) { const p = paras.items[i]; if (/heading/i.test(p.style || "")) heads.push(p.text.trim().slice(0, 80)); if (heads.length >= 20) break; }
     return { paragraf: n, headings: heads };
-  }), () => ({ paragraf: 0, headings: [] });
+  }), () => ({ paragraf: 0, headings: [] }));
 }
 
 export async function tulisGanti(teks) {
@@ -105,6 +105,18 @@ export async function kotakNative(teks, bentuk = "Rectangle") {
   }));
 }
 
+// Sisip OOXML (flowchart native editable). Gagal → {ok:false} agar caller fallback ke gambar.
+export async function sisipOoxml(ooxml) {
+  return new Promise((resolve) => {
+    try {
+      Office.context.document.setSelectedDataAsync(ooxml, { coercionType: Office.CoercionType.Ooxml }, (r) => {
+        if (r.status === Office.AsyncResultStatus.Succeeded) resolve(true);
+        else resolve({ ok: false, reason: (r.error && r.error.message) || "ditolak Word" });
+      });
+    } catch (e) { resolve({ ok: false, reason: String((e && e.message) || e) }); }
+  });
+}
+
 // Eksekutor ops dari AI (minimal-diff contract).
 export async function eksekusiOps(ops) {
   for (const op of ops || []) {
@@ -128,6 +140,18 @@ export async function eksekusiOps(ops) {
         }
       }
       await sisipGambarBase64(b64 || "", op.caption || op.title || "");
+    }
+    else if (op.tool === "buat_flowchart_native") {
+      const F = await import("./FlowchartOoxml.js");
+      let ooxml = op._ooxml;
+      if (!ooxml) { try { ooxml = F.buildFlowchartOoxml({ nodes: op.nodes, edges: op.edges }); } catch (e) { ooxml = null; } }
+      const r = ooxml ? await sisipOoxml(ooxml) : { ok: false };
+      if (r !== true) { // fallback jujur: gambar (selalu bisa di semua platform)
+        console.warn("[DocAssist] native gagal, fallback gambar:", r && r.reason);
+        const V = await import("./Visuals.js");
+        const png = await V.renderMermaidPNG(F.flowToMermaid({ nodes: op.nodes, edges: op.edges }));
+        await sisipGambarBase64(png.split(",")[1], (op.caption || "Flowchart") + " (gambar — mode editable gagal)");
+      }
     }
     // unknown tool: skip (hemat, anti-rusak)
   }

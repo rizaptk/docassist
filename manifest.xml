@@ -16,6 +16,17 @@
     <AppDomain>https://~HOST~</AppDomain>
     <AppDomain>https://api.openai.com</AppDomain>
     <AppDomain>https://generativelanguage.googleapis.com</AppDomain>
+    <AppDomain>https://api.groq.com</AppDomain>
+    <AppDomain>https://openrouter.ai</AppDomain>
+    <AppDomain>https://api.cerebras.ai</AppDomain>
+    <AppDomain>https://api.mistral.ai</AppDomain>
+    <AppDomain>https://router.huggingface.co</AppDomain>
+    <AppDomain>https://integrate.api.nvidia.com</AppDomain>
+    <AppDomain>https://text.pollinations.ai</AppDomain>
+    <AppDomain>https://api.deepseek.com</AppDomain>
+    <AppDomain>https://api.anthropic.com</AppDomain>
+    <!-- Ollama lokal (Word Desktop). Tambahkan domain provider custom lain di sini. -->
+    <AppDomain>http://localhost:11434</AppDomain>
     <AppDomain>https://cdn.jsdelivr.net</AppDomain>
   </AppDomains>
   <Hosts><Host Name="Document"/></Hosts>

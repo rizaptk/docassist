@@ -26,4 +26,7 @@
 #settings label{display:flex;flex-direction:column;font-size:12px;color:var(--mut)}#settings input,#settings select{border:1px solid var(--line);border-radius:6px;padding:5px 7px;color:var(--fg)}
 .s-row{display:flex;gap:6px}.s-row button{flex:1;border:1px solid var(--line);border-radius:6px;padding:4px;cursor:pointer;background:#fff}
 .warn{font-size:11px;color:var(--mut);margin:2px 0}
+.hint{font-size:11px;color:var(--mut);margin:-2px 0 2px}.hint a{color:var(--acc)}
+#settings details{border:1px dashed var(--line);border-radius:6px;padding:4px 7px}#settings summary{cursor:pointer;font-size:12px;color:var(--mut)}
+#settings details label{margin-top:4px}#btnDelProv{color:#b91c1c}
 @media (max-width:360px){#pane{width:100vw}}

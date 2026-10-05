@@ -3,7 +3,7 @@
 Add-on MS Word ringan yang menjadi **asisten operasional dokumen**: format, buat, ubah, edit, tambah, dan desain dokumen langsung dari **chat widget kecil** yang tidak mengganggu kerja.
 
 - 🆓 **Gratis**: tanpa server, hosting statis (GitHub Pages/Netlify/Vercel).
-- 🔑 **BYOK**: API key OpenAI / Gemini milik user, tersimpan lokal di perangkat.
+- 🔑 **BYOK multi-provider**: Gemini, Groq, NVIDIA NIM, OpenRouter :free, Cerebras, Mistral, Hugging Face, Pollinations (tanpa daftar), Ollama lokal — plus OpenAI/DeepSeek/Claude berbayar. Daftar di `config/providers.json`, user tinggal pilih + isi key.
 - 🪶 **Ringan**: tanpa framework, tanpa build step — HTML/CSS/JS murni + Office.js.
 - 🧠 **Hemat token**: konteks berlapis + cache ringkasan AI (DocManifest).
 - 🛡️ **Anti-slop**: AI mengembalikan operasi minimal-diff + pratinjau sebelum diterapkan.

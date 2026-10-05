@@ -13,9 +13,10 @@ Add-on MS Word ringan yang menjadi **asisten operasional dokumen**: format, buat
 | Fitur | Keterangan |
 |-------|-----------|
 | Chat widget 330px | Docked task pane, bisa dilipat jadi strip ikon 48px |
-| Quick chips | Rapikan, Lanjutkan, Tabel, Formal — satu klik |
-| BYOK OpenAI + Gemini | Dropdown provider/model, slider suhu, Test Connection |
-| 12 tools Word atomik | Baca/tulis seleksi, style, tabel, cari-ganti, komentar |
+| Quick chips | Rapikan, Lanjutkan, Tabel, Formal, Flowchart, Chart, CV, Cek ATS — satu klik |
+| BYOK multi-provider | 12 provider (Gemini/Groq/NVIDIA/:free/...) + custom, browse model dari key |
+| 19 tools Word atomik | Teks, tabel, visual, flowchart editable, CV, cover letter, cek ATS |
+| Template kits | Registry `config/templates.json` + builder (CV ATS/modern, cover letter) |
 | DocManifest cache | Ringkasan AI ikut tersimpan di `.docx` (CustomXmlParts) |
 | Preview diff | Setiap aksi besar tampil sebelum → sesudah + Terapkan/Batal |
 | Streaming responsif | Token mengalir bertahap, bisa dibatalkan, Word tetap bisa diketik |

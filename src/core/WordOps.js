@@ -82,6 +82,31 @@ export async function tambahKomentar(teks) {
   }));
 }
 
+// Sisip 1 paragraf blok bergaya di AKHIR dokumen (untuk hasil generate: CV, artikel, surat).
+export async function sisipBlok(teks, style = "Normal") {
+  return tryCatch(() => run(async (ctx) => {
+    const p = ctx.document.body.insertParagraph(teks || "", Word.InsertLocation.end);
+    if (style && style !== "Normal") p.style = style;
+    await ctx.sync(); return true;
+  }));
+}
+
+// Audit struktur via 1x getOoxml + scan string (anti-API-uncertainty, murah untuk CV 1-2 hlm).
+// stat: {tables, images, textboxes, columns}
+export async function auditStruktur() {
+  return tryCatch(() => run(async (ctx) => {
+    const xml = ctx.document.body.getOoxml();
+    await ctx.sync();
+    const n = (re) => (xml.match(re) || []).length;
+    return {
+      tables: n(/<w:tbl[\s>]/g),
+      images: n(/<pic:pic[\s>]/g) + n(/<wp:inline[\s>]/g), // termasuk grup shapes/flowchart (ATS juga tak membacanya)
+      textboxes: n(/<wps:wsp[\s>]/g) + n(/<w:txbxContent[\s>]/g),
+      columns: /<w:cols[^>]*w:num="[^1"]/.test(xml),
+    };
+  }), () => ({ tables: 0, images: 0, textboxes: 0, columns: false }));
+}
+
 // Sisip gambar (hasil render flowchart/chart) — 1 Word.run, cross-platform.
 export async function sisipGambarBase64(b64, caption = "") {
   return tryCatch(() => run(async (ctx) => {
@@ -117,44 +142,54 @@ export async function sisipOoxml(ooxml) {
   });
 }
 
-// Eksekutor ops dari AI (minimal-diff contract).
-export async function eksekusiOps(ops) {
-  for (const op of ops || []) {
-    if (op.tool === "tulis_ganti") await tulisGanti(op.teks || "");
-    else if (op.tool === "sisip_setelah") await sisipSetelah(op.teks || "");
-    else if (op.tool === "terapkan_style") await terapkanStyle(op.style || "Normal");
-    else if (op.tool === "buat_tabel") await buatTabel(op.rows || 3, op.cols || 3, op.data);
-    else if (op.tool === "cari_ganti") await cariGanti(op.dari || "", op.ke || "");
-    else if (op.tool === "sisip_gambar") await sisipGambarBase64(op.base64 || "", op.caption || "");
-    else if (op.tool === "kotak_teks") { const r = await kotakNative(op.teks || "", op.bentuk || "Rectangle"); if (r && r.reason) console.warn(r.reason); }
-    else if (op.tool === "buat_flowchart" || op.tool === "buat_chart") {
-      const V = await import("./Visuals.js"); // lazy: hanya saat visual diminta
-      let b64 = op._png; // sudah di-render saat preview → pakai ulang, hemat
-      if (!b64) {
-        if (op.tool === "buat_flowchart") b64 = (await V.renderMermaidPNG(op.mermaid || "graph TD;A-->B")).split(",")[1];
-        else {
-          const t = V.parseDataTable(op.data || "");
-          const png = V.renderChartPNG({ title: op.title || "Chart", type: op.chartType || "bar",
-            headers: op.headers || t?.headers || ["", "Nilai"], rows: op.rows || t?.rows || [] });
-          b64 = png.split(",")[1];
-        }
-      }
-      await sisipGambarBase64(b64 || "", op.caption || op.title || "");
-    }
-    else if (op.tool === "buat_flowchart_native") {
-      const F = await import("./FlowchartOoxml.js");
-      let ooxml = op._ooxml;
-      if (!ooxml) { try { ooxml = F.buildFlowchartOoxml({ nodes: op.nodes, edges: op.edges }); } catch (e) { ooxml = null; } }
-      const r = ooxml ? await sisipOoxml(ooxml) : { ok: false };
-      if (r !== true) { // fallback jujur: gambar (selalu bisa di semua platform)
-        console.warn("[DocAssist] native gagal, fallback gambar:", r && r.reason);
-        const V = await import("./Visuals.js");
-        const png = await V.renderMermaidPNG(F.flowToMermaid({ nodes: op.nodes, edges: op.edges }));
-        await sisipGambarBase64(png.split(",")[1], (op.caption || "Flowchart") + " (gambar — mode editable gagal)");
+// Eksekutor ops dari AI (minimal-diff contract). execSatu agar builder bisa reuse.
+export async function execSatu(op) {
+  if (!op || !op.tool) return;
+  if (op.tool === "tulis_ganti") await tulisGanti(op.teks || "");
+  else if (op.tool === "sisip_setelah") await sisipSetelah(op.teks || "");
+  else if (op.tool === "sisip_blok") await sisipBlok(op.teks || "", op.style || "Normal");
+  else if (op.tool === "terapkan_style") await terapkanStyle(op.style || "Normal");
+  else if (op.tool === "buat_tabel") await buatTabel(op.rows || 3, op.cols || 3, op.data);
+  else if (op.tool === "cari_ganti") await cariGanti(op.dari || "", op.ke || "");
+  else if (op.tool === "sisip_gambar") await sisipGambarBase64(op.base64 || "", op.caption || "");
+  else if (op.tool === "kotak_teks") { const r = await kotakNative(op.teks || "", op.bentuk || "Rectangle"); if (r && r.reason) console.warn(r.reason); }
+  else if (op.tool === "buat_flowchart" || op.tool === "buat_chart") {
+    const V = await import("./Visuals.js"); // lazy: hanya saat visual diminta
+    let b64 = op._png; // sudah di-render saat preview → pakai ulang, hemat
+    if (!b64) {
+      if (op.tool === "buat_flowchart") b64 = (await V.renderMermaidPNG(op.mermaid || "graph TD;A-->B")).split(",")[1];
+      else {
+        const t = V.parseDataTable(op.data || "");
+        const png = V.renderChartPNG({ title: op.title || "Chart", type: op.chartType || "bar",
+          headers: op.headers || t?.headers || ["", "Nilai"], rows: op.rows || t?.rows || [] });
+        b64 = png.split(",")[1];
       }
     }
-    // unknown tool: skip (hemat, anti-rusak)
+    await sisipGambarBase64(b64 || "", op.caption || op.title || "");
   }
+  else if (op.tool === "buat_flowchart_native") {
+    const F = await import("./FlowchartOoxml.js");
+    let ooxml = op._ooxml;
+    if (!ooxml) { try { ooxml = F.buildFlowchartOoxml({ nodes: op.nodes, edges: op.edges }); } catch (e) { ooxml = null; } }
+    const r = ooxml ? await sisipOoxml(ooxml) : { ok: false };
+    if (r !== true) { // fallback jujur: gambar (selalu bisa di semua platform)
+      console.warn("[DocAssist] native gagal, fallback gambar:", r && r.reason);
+      const V = await import("./Visuals.js");
+      const png = await V.renderMermaidPNG(F.flowToMermaid({ nodes: op.nodes, edges: op.edges }));
+      await sisipGambarBase64(png.split(",")[1], (op.caption || "Flowchart") + " (gambar — mode editable gagal)");
+    }
+  }
+  else if (op.tool === "buat_cv" || op.tool === "buat_cover_letter") {
+    const B = await import("./Builders/CvBuilder.js"); // lazy: hanya saat kit karir diminta
+    const subs = op.tool === "buat_cv"
+      ? (op.template === "cv-modern" ? B.buildCvModern(op.data) : B.buildCvAts(op.data))
+      : B.buildCoverLetter(op.data);
+    for (const sub of subs) await execSatu(sub);
+  }
+  // unknown tool: skip (hemat, anti-rusak)
+}
+export async function eksekusiOps(ops) {
+  for (const op of ops || []) await execSatu(op);
   return true;
 }
 

@@ -1,0 +1,30 @@
+{
+  "_comment": "DocAssist template registry — cerminan config/providers.json untuk kit dokumen (CV, surat, flyer, ...). Builder = fungsi JS murni di src/core/Builders/<File>.js yang mengembalikan ops primitif WordOps. Tambah kit baru = 1 entri di sini + 1 file builder. desktopOnly=true artinya butuh WordApiDesktop (pageSetup/shapes) dengan fallback Web.",
+  "version": 1,
+  "templates": [
+    {
+      "id": "cv-ats",
+      "jenis": "cv",
+      "label": "CV ATS-friendly",
+      "builder": "CvBuilder.buildCvAts",
+      "desktopOnly": false,
+      "desc": "1 kolom, tanpa tabel/gambar/kolom — lolos parsing ATS."
+    },
+    {
+      "id": "cv-modern",
+      "jenis": "cv",
+      "label": "CV Modern (tabel skill)",
+      "builder": "CvBuilder.buildCvModern",
+      "desktopOnly": false,
+      "desc": "Struktur ATS + tabel keahlian rapi untuk dikirim langsung ke HRD."
+    },
+    {
+      "id": "cover-letter",
+      "jenis": "surat",
+      "label": "Cover Letter / Surat Lamaran",
+      "builder": "CvBuilder.buildCoverLetter",
+      "desktopOnly": false,
+      "desc": "Surat lamaran formal Bahasa Indonesia dari data pelamar + lowongan."
+    }
+  ]
+}

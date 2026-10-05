@@ -1,7 +1,7 @@
 /* taskpane.js — bootstrap ringan: render instan, lazy-load AI/Word, pause saat hidden (hemat CPU/Word). */
 import { buildContext } from "../core/ContextBuilder.js";
 import { loadManifest, ensureManifest, saveManifestLocal, cheapHash, isStale } from "../core/ManifestManager.js";
-import { eksekusiOps, bacaMeta, bacaJendela } from "../core/WordOps.js";
+import { eksekusiOps, bacaMeta, bacaJendela, auditStruktur } from "../core/WordOps.js";
 
 const $ = (id) => document.getElementById(id);
 const msgs = $("msgs"), badge = $("cacheBadge");
@@ -135,6 +135,17 @@ $("form").onsubmit = async (e) => {
     thinking.textContent = res.alasan_singkat || "Siap.";
     if (res.preview) { $("diffBefore").textContent = (ctx.l1.seleksi || "(kosong)").slice(0, 600); $("diffAfter").textContent = res.preview.slice(0, 600); $("diffBox").hidden = false; }
     pendingOps = res.ops || [];
+    // Audit ATS: jalan duluan, hasilnya bubble chat (bukan diff), lalu dibuang dari antrean.
+    if (pendingOps.some((o) => o.tool === "cek_ats")) {
+      thinking.textContent = "Memeriksa struktur dokumen…";
+      try {
+        const B = await import("../core/Builders/CvBuilder.js");
+        const v = B.auditVerdict(await auditStruktur());
+        addMsg("a", (v.lolos ? "✅ " : "⚠️ ") + v.pesan);
+      } catch (err) { addMsg("sys", "Audit gagal: " + err.message); }
+      pendingOps = pendingOps.filter((o) => o.tool !== "cek_ats");
+      if (!pendingOps.length && !res.preview) { thinking.textContent = res.alasan_singkat || "Audit selesai."; busy = false; return; }
+    }
     // Visual (flowchart/chart): render dulu untuk pratinjau, sisip saat Terapkan.
     // Flowchart native: pratinjau = render mermaid dari nodes/edges; yang disisip = shapes editable.
     const vis = pendingOps.filter((o) => o.tool === "buat_flowchart" || o.tool === "buat_chart" || o.tool === "buat_flowchart_native");

@@ -79,3 +79,17 @@ store["docassist:provider"] = "gemini";
 const r3 = await AI.listModels();
 a.deepEqual(r3.models, ["gemini-x"], "gemini filter generateContent");
 console.log("smoke OK: browse model dari key — semua lolos");
+
+// CvBuilder: struktur ops + verdict ATS (murni, tanpa Word).
+const CB = await import("../src/core/Builders/CvBuilder.js");
+const cvOps = CB.buildCvAts({ nama: "Budi", kontak: "budi@x.id", pengalaman: [{ jabatan: "Kasir", perusahaan: "Toko A", periode: "2022-2024", poin: ["Melayani 100+ pelanggan/hari"] }], skills: ["Kasir", "Stok"] });
+a.equal(cvOps[0].tool, "sisip_blok"); a.equal(cvOps[0].style, "Heading 1"); a.equal(cvOps[0].teks, "Budi");
+a.ok(cvOps.some((o) => o.teks.startsWith("• Melayani")), "poin jadi bullet");
+a.ok(CB.buildCvModern({ skills: ["a", "b", "c"] }).some((o) => o.tool === "buat_tabel"), "modern + tabel skill");
+const cl = CB.buildCoverLetter({ nama: "Budi", posisi: "Kasir" });
+a.ok(cl.length >= 4 && cl.every((o) => o.tool === "sisip_blok"), "cover letter = blok");
+a.equal(CB.auditVerdict({ images: 0, textboxes: 0, tables: 0, columns: false }).lolos, true);
+a.equal(CB.auditVerdict({ images: 1, textboxes: 0, tables: 5, columns: true }).lolos, false);
+const reg2 = JSON.parse(readFileSync("config/templates.json", "utf8"));
+a.ok(reg2.templates.some((t) => t.id === "cv-ats"), "registry template ada");
+console.log("smoke OK: CV builder + ATS verdict — semua lolos");

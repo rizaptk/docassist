@@ -98,7 +98,7 @@ msgs.addEventListener("click", (e) => {
   $("input").value = b.dataset.tpl + " "; hideSlash(); $("input").focus();
 });
 $("input").addEventListener("input", () => { slashIdx = -1; renderSlash(); autoGrow(); });
-function autoGrow() { const t = $("input"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 74) + "px"; }
+function autoGrow() { const t = $("input"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 76) + "px"; }
 $("input").addEventListener("keydown", (e) => {
   const box = $("slashBox");
   if (!box.hidden) {

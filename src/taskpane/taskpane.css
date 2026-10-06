@@ -36,9 +36,12 @@
 .diff-h button{margin-left:6px;border:1px solid var(--line);border-radius:6px;cursor:pointer;padding:2px 10px}
 #btnApply{background:var(--acc);color:#fff;border-color:var(--acc)}
 .diff-c{display:grid;grid-template-columns:1fr 1fr;gap:6px}.diff-c pre{background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px;max-height:120px;overflow:auto;font-size:12px;margin:4px 0 0}
-#form{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--line);align-items:flex-end}
-#form textarea{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;color:var(--fg);background:var(--bg);resize:none;overflow-y:auto;max-height:74px;line-height:1.45}
-#form button{flex:none;border:1px solid var(--acc);background:var(--acc);color:#fff;border-radius:8px;padding:0 12px;height:32px;cursor:pointer;align-self:flex-end}
+#form{display:flex;padding:8px 10px;border-top:1px solid var(--line)}
+#promptWrap{position:relative;flex:1;width:100%;display:flex}
+#form textarea{flex:1;width:100%;min-height:36px;border:1px solid var(--line);border-radius:10px;padding:8px 38px 8px 10px;font:inherit;color:var(--fg);background:var(--bg);resize:none;overflow-y:auto;max-height:76px;line-height:1.45}
+#form button{position:absolute;right:6px;bottom:6px;border:0;background:transparent;color:var(--acc);font-size:17px;line-height:1;width:30px;height:30px;cursor:pointer;border-radius:7px}
+#form button:hover{background:#eff6ff}
+#app[data-theme="dark"] #form button:hover{background:#2d4a6f}
 #app{position:relative}
 #backdrop{display:none;position:absolute;inset:0;background:rgba(17,24,39,.35);z-index:9}
 #backdrop.open{display:block}

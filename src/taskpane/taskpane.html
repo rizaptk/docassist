@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>DocAssist</title>
-<link rel="stylesheet" href="./taskpane.css?v=20261006d"/>
+<link rel="stylesheet" href="./taskpane.css?v=20261006e"/>
 <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 </head>
 <body>
@@ -30,7 +30,7 @@
       <div class="diff-c"><div><h6>Sebelum</h6><pre id="diffBefore"></pre></div><div><h6>Sesudah</h6><pre id="diffAfter"></pre></div></div>
     </div>
     <div id="slashBox" hidden role="listbox" aria-label="Perintah tersedia"></div>
-    <form id="form"><textarea id="input" rows="1" placeholder="Ketik / untuk perintah…"></textarea><button title="Kirim (Enter, Shift+Enter baris baru)" aria-label="Kirim">➤</button></form>
+    <form id="form"><div id="promptWrap"><textarea id="input" rows="1" placeholder="Ketik / untuk perintah…"></textarea><button title="Kirim (Enter, Shift+Enter baris baru)" aria-label="Kirim">➤</button></div></form>
   </div>
   <div id="backdrop" hidden></div>
   <div id="settings" hidden role="dialog" aria-label="Pengaturan AI">
@@ -48,10 +48,10 @@
         <label>Model awal <input id="cModel" placeholder="nama-model"/></label>
         <div class="s-row"><button type="button" id="btnAddProv">Simpan</button><button type="button" id="btnDelProv">Hapus yg aktif</button></div>
       </details>
-      <p class="warn">Daftar bawaan dari <code>config/providers.json</code> (ikut git). Key tersimpan lokal di perangkat ini. <span id="buildTag">build 20261006d</span></p>
+      <p class="warn">Daftar bawaan dari <code>config/providers.json</code> (ikut git). Key tersimpan lokal di perangkat ini. <span id="buildTag">build 20261006e</span></p>
     </div>
 </div>
-<!-- APPVER=20261006d — naikkan tiap rilis agar WebView tidak pakai cache lama -->
-<script type="module" src="./taskpane.js?v=20261006d"></script>
+<!-- APPVER=20261006e — naikkan tiap rilis agar WebView tidak pakai cache lama -->
+<script type="module" src="./taskpane.js?v=20261006e"></script>
 </body>
 </html>

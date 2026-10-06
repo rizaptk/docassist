@@ -99,8 +99,32 @@ export async function ask(q, ctx, onTok) {
     : prov.style === "anthropic" ? await callAnthropicStyle(prov, q, ctx, onTok)
     : await callOpenAIStyle(prov, q, ctx, onTok);
   try { const start = raw.indexOf("{"), end = raw.lastIndexOf("}");
-    return JSON.parse(raw.slice(start, end + 1));
+    return normOps(JSON.parse(raw.slice(start, end + 1)));
   } catch (e) { return { ops: [], alasan_singkat: "Gagal parse JSON AI.", preview: raw.slice(0, 500) }; }
+}
+
+// Normalisasi toleran: AI kadang mengarang key (action/target/content) atau
+// mengembalikan DATA mentah tanpa ops. Tanpa ini, op tak dikenal dilewati diam-diam.
+export function normOps(res) {
+  if (!res || typeof res !== "object") return { ops: [], alasan_singkat: "Respons AI kosong." };
+  let ops = Array.isArray(res.ops) ? res.ops : [];
+  ops = ops.map((o) => {
+    if (!o || typeof o !== "object") return null;
+    const op = { ...o };
+    op.tool = op.tool || op.action || op.name || "";
+    delete op.action; delete op.name;
+    if (op.teks == null) op.teks = op.content ?? op.text ?? op.value ?? "";
+    if (typeof op.teks !== "string") op.teks = String(op.teks ?? "");
+    return op.tool ? op : null;
+  }).filter(Boolean);
+  if (!ops.length) { // heuristik bungkus-data: selamatkan respons berisi data, bukan ops
+    if (res.nama || res.ringkasan || res.pengalaman) ops = [{ tool: "buat_cv", template: "cv-ats", data: res }];
+    else if (Array.isArray(res.headers) && Array.isArray(res.rows)) ops = [{ tool: "buat_chart", chartType: "bar", title: res.title || "Chart", headers: res.headers, rows: res.rows }];
+    else if (typeof res.mermaid === "string") ops = [{ tool: "buat_flowchart", mermaid: res.mermaid, caption: res.caption || "" }];
+    else if (Array.isArray(res.nodes)) ops = [{ tool: "buat_flowchart_native", nodes: res.nodes, edges: res.edges || [], caption: res.caption || "" }];
+    else if (Number.isInteger(res.rows) && Number.isInteger(res.cols)) ops = [{ tool: "buat_tabel", rows: res.rows, cols: res.cols, data: res.data }];
+  }
+  res.ops = ops; return res;
 }
 
 export async function testConn() { // payload terkecil per gaya

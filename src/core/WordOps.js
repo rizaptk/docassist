@@ -143,16 +143,17 @@ export async function sisipOoxml(ooxml) {
 }
 
 // Eksekutor ops dari AI (minimal-diff contract). execSatu agar builder bisa reuse.
+// Kembali: true bila tool dikenali & dieksekusi, false bila dilewati → pesan jujur di UI.
 export async function execSatu(op) {
-  if (!op || !op.tool) return;
-  if (op.tool === "tulis_ganti") await tulisGanti(op.teks || "");
-  else if (op.tool === "sisip_setelah") await sisipSetelah(op.teks || "");
-  else if (op.tool === "sisip_blok") await sisipBlok(op.teks || "", op.style || "Normal");
-  else if (op.tool === "terapkan_style") await terapkanStyle(op.style || "Normal");
-  else if (op.tool === "buat_tabel") await buatTabel(op.rows || 3, op.cols || 3, op.data);
-  else if (op.tool === "cari_ganti") await cariGanti(op.dari || "", op.ke || "");
-  else if (op.tool === "sisip_gambar") await sisipGambarBase64(op.base64 || "", op.caption || "");
-  else if (op.tool === "kotak_teks") { const r = await kotakNative(op.teks || "", op.bentuk || "Rectangle"); if (r && r.reason) console.warn(r.reason); }
+  if (!op || !op.tool) return false;
+  if (op.tool === "tulis_ganti") return !!(await tulisGanti(op.teks || ""));
+  else if (op.tool === "sisip_setelah") return !!(await sisipSetelah(op.teks || ""));
+  else if (op.tool === "sisip_blok") return !!(await sisipBlok(op.teks || "", op.style || "Normal"));
+  else if (op.tool === "terapkan_style") return !!(await terapkanStyle(op.style || "Normal"));
+  else if (op.tool === "buat_tabel") return !!(await buatTabel(op.rows || 3, op.cols || 3, op.data));
+  else if (op.tool === "cari_ganti") return !!(await cariGanti(op.dari || "", op.ke || ""));
+  else if (op.tool === "sisip_gambar") return !!(await sisipGambarBase64(op.base64 || "", op.caption || ""));
+  else if (op.tool === "kotak_teks") { const r = await kotakNative(op.teks || "", op.bentuk || "Rectangle"); if (r && r.reason) console.warn(r.reason); return r === true || !!(r && r.ok); }
   else if (op.tool === "buat_flowchart" || op.tool === "buat_chart") {
     const V = await import("./Visuals.js"); // lazy: hanya saat visual diminta
     let b64 = op._png; // sudah di-render saat preview → pakai ulang, hemat
@@ -165,7 +166,7 @@ export async function execSatu(op) {
         b64 = png.split(",")[1];
       }
     }
-    await sisipGambarBase64(b64 || "", op.caption || op.title || "");
+    return !!(await sisipGambarBase64(b64 || "", op.caption || op.title || ""));
   }
   else if (op.tool === "buat_flowchart_native") {
     const F = await import("./FlowchartOoxml.js");
@@ -176,21 +177,25 @@ export async function execSatu(op) {
       console.warn("[DocAssist] native gagal, fallback gambar:", r && r.reason);
       const V = await import("./Visuals.js");
       const png = await V.renderMermaidPNG(F.flowToMermaid({ nodes: op.nodes, edges: op.edges }));
-      await sisipGambarBase64(png.split(",")[1], (op.caption || "Flowchart") + " (gambar — mode editable gagal)");
+      return !!(await sisipGambarBase64(png.split(",")[1], (op.caption || "Flowchart") + " (gambar — mode editable gagal)"));
     }
+    return true;
   }
   else if (op.tool === "buat_cv" || op.tool === "buat_cover_letter") {
     const B = await import("./Builders/CvBuilder.js"); // lazy: hanya saat kit karir diminta
     const subs = op.tool === "buat_cv"
       ? (op.template === "cv-modern" ? B.buildCvModern(op.data) : B.buildCvAts(op.data))
       : B.buildCoverLetter(op.data);
-    for (const sub of subs) await execSatu(sub);
+    let n = 0;
+    for (const sub of subs) if (await execSatu(sub)) n++;
+    return n > 0;
   }
-  // unknown tool: skip (hemat, anti-rusak)
+  return false; // unknown tool: skip (hemat, anti-rusak)
 }
 export async function eksekusiOps(ops) {
-  for (const op of ops || []) await execSatu(op);
-  return true;
+  let n = 0;
+  for (const op of ops || []) if (await execSatu(op)) n++;
+  return n;
 }
 
 // ponytail: no per-paragraf Merkle; hash murah di ManifestManager.

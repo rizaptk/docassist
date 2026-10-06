@@ -68,7 +68,7 @@ function renderSlash() {
   });
   box.hidden = false;
 }
-function hideSlash() { $("slashBox").hidden = true; slashIdx = -1; }
+function hideSlash() { $("slashBox").hidden = true; slashIdx = -1; autoGrow(); }
 function pickSlash(i) {
   const m = slashMatches(); if (!m || !m[i]) return;
   const s = m[i];
@@ -97,15 +97,18 @@ msgs.addEventListener("click", (e) => {
   if (!b) return;
   $("input").value = b.dataset.tpl + " "; hideSlash(); $("input").focus();
 });
-$("input").addEventListener("input", () => { slashIdx = -1; renderSlash(); });
+$("input").addEventListener("input", () => { slashIdx = -1; renderSlash(); autoGrow(); });
+function autoGrow() { const t = $("input"); t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 74) + "px"; }
 $("input").addEventListener("keydown", (e) => {
   const box = $("slashBox");
-  if (box.hidden) return;
-  const n = box.children.length;
-  if (e.key === "ArrowDown") { e.preventDefault(); slashIdx = (slashIdx + 1) % n; renderSlash(); }
-  else if (e.key === "ArrowUp") { e.preventDefault(); slashIdx = (slashIdx - 1 + n) % n; renderSlash(); }
-  else if ((e.key === "Enter" || e.key === "Tab") && slashIdx >= 0) { e.preventDefault(); pickSlash(slashIdx); }
-  else if (e.key === "Escape") { hideSlash(); }
+  if (!box.hidden) {
+    const n = box.children.length;
+    if (e.key === "ArrowDown") { e.preventDefault(); slashIdx = (slashIdx + 1) % n; renderSlash(); return; }
+    else if (e.key === "ArrowUp") { e.preventDefault(); slashIdx = (slashIdx - 1 + n) % n; renderSlash(); return; }
+    else if ((e.key === "Enter" || e.key === "Tab") && slashIdx >= 0) { e.preventDefault(); pickSlash(slashIdx); return; }
+    else if (e.key === "Escape") { hideSlash(); return; }
+  }
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("form").requestSubmit(); }
 });
 function expandSlash(raw) {
   if (!raw.startsWith("/")) return { q: raw };
@@ -219,12 +222,12 @@ $("form").onsubmit = async (e) => {
   $("input").value = ""; hideSlash(); addMsg("u", q); busy = true;
   const ex = expandSlash(q); if (ex.handled) { busy = false; return; } // /tools /help /clear
   const q2 = ex.q; // slash command → template + konteks user
-  const thinking = addMsg("a", "…");
+  const thinking = addMsg("a", "Menyusun operasi…");
   try {
     await refreshCtx(false);
     const ctx = await buildContext(manifest);
     const ai = await lazyAI();
-    const res = await ai.ask(q2, ctx, streamTo(thinking));
+    const res = await ai.ask(q2, ctx, null); // tanpa streaming mentah: output AI selalu JSON mesin
     thinking.textContent = res.alasan_singkat || "Siap.";
     if (res.preview) { $("diffBefore").textContent = (ctx.l1.seleksi || "(kosong)").slice(0, 600); $("diffAfter").textContent = res.preview.slice(0, 600); $("diffBox").hidden = false; }
     pendingOps = res.ops || [];
@@ -273,11 +276,18 @@ $("form").onsubmit = async (e) => {
       thinking.textContent = res.alasan_singkat || "Visual siap dipratinjau.";
     }
     if (!pendingOps.length && res.preview) pendingOps = [{ tool: "tulis_ganti", teks: res.preview }];
-    if (pendingOps.length && !res.preview) { await eksekusiOps(pendingOps); pendingOps = null; addMsg("sys", "Diterapkan langsung (aksi kecil)."); }
+    if (pendingOps.length && !res.preview) {
+      const n = await eksekusiOps(pendingOps); pendingOps = null;
+      addMsg("sys", n ? "Diterapkan langsung (aksi kecil). Ctrl+Z untuk batal." : "Tidak ada aksi valid yang bisa diterapkan.");
+    }
   } catch (err) { thinking.textContent = "Gagal: " + err.message; }
   busy = false;
 };
-$("btnApply").onclick = async () => { if (pendingOps) await eksekusiOps(pendingOps); pendingOps = null; $("diffBox").hidden = true; $("diffImg").hidden = true; addMsg("sys", "Diterapkan. Ctrl+Z untuk batal."); };
+$("btnApply").onclick = async () => {
+  const n = pendingOps ? await eksekusiOps(pendingOps) : 0;
+  pendingOps = null; $("diffBox").hidden = true; $("diffImg").hidden = true;
+  addMsg("sys", n ? `Diterapkan (${n} aksi). Ctrl+Z untuk batal.` : "Tidak ada aksi valid yang diterapkan.");
+};
 $("btnDiscard").onclick = () => { pendingOps = null; $("diffBox").hidden = true; $("diffImg").hidden = true; };
 
 // Pause background saat pane hidden (jangan ganggu Word).

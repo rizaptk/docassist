@@ -93,3 +93,21 @@ a.equal(CB.auditVerdict({ images: 1, textboxes: 0, tables: 5, columns: true }).l
 const reg2 = JSON.parse(readFileSync("config/templates.json", "utf8"));
 a.ok(reg2.templates.some((t) => t.id === "cv-ats"), "registry template ada");
 console.log("smoke OK: CV builder + ATS verdict — semua lolos");
+
+// normOps: alias skema karangan AI + bungkus-data (kasus nyata dari uji Word).
+const N = AI.normOps;
+let r = N({ ops: [{ action: "tulis_ganti", target: "coba", content: "Coba" }] });
+a.equal(r.ops[0].tool, "tulis_ganti"); a.equal(r.ops[0].teks, "Coba");
+r = N({ ringkasan: "Profesional", pengalaman: [], pendidikan: [], skills: [] });
+a.equal(r.ops[0].tool, "buat_cv"); a.equal(r.ops[0].data.ringkasan, "Profesional");
+r = N({ headers: ["", "Nilai"], rows: [["A", 1]] });
+a.equal(r.ops[0].tool, "buat_chart");
+r = N({ mermaid: "graph TD;A-->B" });
+a.equal(r.ops[0].tool, "buat_flowchart");
+r = N({ nodes: [{ id: "a", label: "A" }], edges: [] });
+a.equal(r.ops[0].tool, "buat_flowchart_native");
+r = N({ ops: [{ tool: "cari_ganti", dari: "x", ke: "y" }] });
+a.equal(r.ops[0].tool, "cari_ganti"); a.equal(r.ops[0].dari, "x");
+r = N({ ops: [{ foo: 1 }] });
+a.equal(r.ops.length, 0, "op tanpa nama tool dibuang");
+console.log("smoke OK: normOps toleran — semua lolos");

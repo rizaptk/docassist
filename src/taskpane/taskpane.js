@@ -23,7 +23,11 @@ function streamTo(el) { return (tok) => { rafQ += tok; if (rafOn) return; rafOn 
 $("btnCollapse").onclick = () => $("app").classList.add("collapsed");
 $("btnExpand").onclick = () => $("app").classList.remove("collapsed");
 $("btnHide").onclick = async () => { try { await Office.addin.hide(); } catch (e) { $("app").classList.add("collapsed"); } };
-$("btnSettings").onclick = () => { const s = $("settings"); s.hidden = !s.hidden; };
+function openSettings() { $("settings").hidden = false; $("backdrop").hidden = false; }
+function closeSettings() { $("settings").hidden = true; $("backdrop").hidden = true; }
+$("btnSettings").onclick = openSettings;
+$("btnCloseSettings").onclick = closeSettings;
+$("backdrop").onclick = closeSettings;
 document.querySelectorAll("#chips button").forEach((b) => (b.onclick = () => {
   if (b.dataset.prefill) { $("input").value = b.dataset.prefill; $("input").focus(); } // visual: user lanjutkan ketik/paste
   else { $("input").value = b.dataset.q; $("form").requestSubmit(); }

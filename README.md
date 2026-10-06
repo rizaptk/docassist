@@ -13,7 +13,7 @@ Add-on MS Word ringan yang menjadi **asisten operasional dokumen**: format, buat
 | Fitur | Keterangan |
 |-------|-----------|
 | Chat widget 330px | Docked task pane, bisa dilipat jadi strip ikon 48px |
-| Quick chips | 8 tombol ikon ala ribbon (tooltip), chat full-height |
+| Slash commands | `/rapikan /cv /flowchart…` + autocomplete, `/tools` daftar klik — chat full-height |
 | BYOK multi-provider | 12 provider + custom, browse model dari key, Test koneksi |
 | 19 tools Word atomik | Teks, tabel, visual, flowchart editable, CV, cover letter, cek ATS |
 | Template kits | Registry `config/templates.json` + builder (CV ATS/modern, cover letter) |
@@ -21,6 +21,7 @@ Add-on MS Word ringan yang menjadi **asisten operasional dokumen**: format, buat
 | Chart dari data | Paste tabel/angka → grafik batang/garis + tabel sumber |
 | DocManifest cache | Ringkasan AI ikut tersimpan di `.docx` (CustomXmlParts) |
 | Pengaturan AI | Modal overlay (tombol ⚙) — chat full-height, tidak terjepit |
+| Theme-aware | Mengikuti tema Word (OfficeTheme) / system dark-mode otomatis |
 | Preview diff | Setiap aksi besar tampil sebelum → sesudah + Terapkan/Batal |
 | Streaming responsif | Token mengalir bertahap, bisa dibatalkan, Word tetap bisa diketik |
 

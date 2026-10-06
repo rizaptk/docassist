@@ -23,23 +23,14 @@
       <button id="btnCollapse" title="Lipat jadi strip (tidak mengganggu)">–</button>
       <button id="btnSettings" title="Pengaturan AI">⚙</button>
     </header>
-    <div id="chips" role="toolbar" aria-label="Perintah cepat">
-      <button data-q="Rapikan paragraf ini, pertahankan istilah teknis." title="Rapikan" aria-label="Rapikan">✨</button>
-      <button data-q="Lanjutkan 2 paragraf dengan nada yang sama." title="Lanjutkan" aria-label="Lanjutkan">📝</button>
-      <button data-q="Buatkan tabel 3x3 rapi dari teks ini." title="Tabel" aria-label="Tabel">▦</button>
-      <button data-q="Formal-kan tanpa ubah makna." title="Formal" aria-label="Formal">🎓</button>
-      <button data-prefill="Buatkan flowchart yang bisa diedit dari alur berikut: " title="Flowchart" aria-label="Flowchart">🔀</button>
-      <button data-prefill="Buatkan chart dari data berikut (paste tabel/angka): " title="Chart" aria-label="Chart">📊</button>
-      <button data-prefill="Buatkan CV ATS-friendly dari data berikut (nama, kontak, pengalaman, pendidikan, skill): " title="CV" aria-label="CV">📄</button>
-      <button data-q="Cek apakah dokumen ini lolos ATS, beri saran perbaikan." title="Cek ATS" aria-label="Cek ATS">✅</button>
-    </div>
     <div id="msgs" aria-live="polite"></div>
     <div id="diffBox" hidden>
       <div class="diff-h">Pratinjau perubahan <span><button id="btnApply">Terapkan</button><button id="btnDiscard">Batal</button></span></div>
       <img id="diffImg" hidden alt="pratinjau visual"/>
       <div class="diff-c"><div><h6>Sebelum</h6><pre id="diffBefore"></pre></div><div><h6>Sesudah</h6><pre id="diffAfter"></pre></div></div>
     </div>
-    <form id="form"><input id="input" placeholder="Perintah operasional…" autocomplete="off"/><button title="Kirim" aria-label="Kirim">➤</button></form>
+    <div id="slashBox" hidden role="listbox" aria-label="Perintah tersedia"></div>
+    <form id="form"><input id="input" placeholder="Ketik / untuk perintah…" autocomplete="off"/><button title="Kirim" aria-label="Kirim">➤</button></form>
   </div>
   <div id="backdrop" hidden></div>
   <div id="settings" hidden role="dialog" aria-label="Pengaturan AI">

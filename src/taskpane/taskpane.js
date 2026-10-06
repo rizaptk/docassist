@@ -28,10 +28,96 @@ function closeSettings() { $("settings").hidden = true; $("backdrop").hidden = t
 $("btnSettings").onclick = openSettings;
 $("btnCloseSettings").onclick = closeSettings;
 $("backdrop").onclick = closeSettings;
-document.querySelectorAll("#chips button").forEach((b) => (b.onclick = () => {
-  if (b.dataset.prefill) { $("input").value = b.dataset.prefill; $("input").focus(); } // visual: user lanjutkan ketik/paste
-  else { $("input").value = b.dataset.q; $("form").requestSubmit(); }
-}));
+$("backdrop").onclick = closeSettings;
+
+// Slash commands ala Hermes/opencode: "/" → autocomplete, "/tools" → daftar klik di chat.
+const SLASH = [
+  { cmd: "rapikan", ic: "✨", desc: "Rapikan paragraf, pertahankan istilah", template: "Rapikan paragraf ini, pertahankan istilah teknis." },
+  { cmd: "lanjutkan", ic: "📝", desc: "Lanjutkan tulisan dengan nada sama", template: "Lanjutkan 2 paragraf dengan nada yang sama." },
+  { cmd: "tabel", ic: "▦", desc: "Buatkan tabel rapi", template: "Buatkan tabel 3x3 rapi dari teks ini." },
+  { cmd: "formal", ic: "🎓", desc: "Formal-kan tanpa ubah makna", template: "Formal-kan tanpa ubah makna." },
+  { cmd: "flowchart", ic: "🔀", desc: "Flowchart editable dari alur", template: "Buatkan flowchart yang bisa diedit dari alur berikut: " },
+  { cmd: "chart", ic: "📊", desc: "Chart dari data paste", template: "Buatkan chart dari data berikut (paste tabel/angka): " },
+  { cmd: "cv", ic: "📄", desc: "CV ATS-friendly dari data", template: "Buatkan CV ATS-friendly dari data berikut (nama, kontak, pengalaman, pendidikan, skill): " },
+  { cmd: "cek-ats", ic: "✅", desc: "Audit kelolosan ATS dokumen", template: "Cek apakah dokumen ini lolos ATS, beri saran perbaikan." },
+  { cmd: "tools", ic: "🧰", desc: "Tampilkan daftar tools", template: "" },
+  { cmd: "help", ic: "❓", desc: "Bantuan slash command", template: "" },
+  { cmd: "clear", ic: "🧹", desc: "Bersihkan chat", template: "" },
+];
+let slashIdx = -1;
+function slashMatches() {
+  const v = $("input").value;
+  if (!v.startsWith("/") || /\s/.test(v)) return null;
+  const q = v.slice(1).toLowerCase();
+  return SLASH.filter((s) => s.cmd.startsWith(q));
+}
+function renderSlash() {
+  const box = $("slashBox"), m = slashMatches();
+  if (!m) { box.hidden = true; slashIdx = -1; return; }
+  box.innerHTML = "";
+  m.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.className = "slash-item" + (i === slashIdx ? " active" : ""); b.setAttribute("role", "option");
+    b.innerHTML = "";
+    const ic = document.createElement("span"); ic.className = "ic"; ic.textContent = s.ic;
+    const cd = document.createElement("code"); cd.textContent = "/" + s.cmd;
+    const ds = document.createElement("span"); ds.className = "ds"; ds.textContent = s.desc;
+    b.append(ic, cd, ds);
+    b.onclick = () => pickSlash(i);
+    box.appendChild(b);
+  });
+  box.hidden = false;
+}
+function hideSlash() { $("slashBox").hidden = true; slashIdx = -1; }
+function pickSlash(i) {
+  const m = slashMatches(); if (!m || !m[i]) return;
+  const s = m[i];
+  if (s.cmd === "tools") { hideSlash(); $("input").value = ""; renderToolsList(); $("input").focus(); return; }
+  if (s.cmd === "help") { hideSlash(); $("input").value = ""; showSlashHelp(); $("input").focus(); return; }
+  if (s.cmd === "clear") { hideSlash(); $("input").value = ""; msgs.innerHTML = ""; return; }
+  $("input").value = "/" + s.cmd + " ";
+  if (s.template && !s.template.endsWith(" ")) { $("input").value = s.template + " "; }
+  else if (s.template) { $("input").value = s.template; }
+  hideSlash(); $("input").focus();
+}
+function renderToolsList() {
+  const d = addMsg("a", "Tools tersedia — klik untuk mengisi prompt:");
+  const w = document.createElement("div"); w.className = "tool-list";
+  for (const s of SLASH.filter((x) => x.template)) {
+    const b = document.createElement("button"); b.className = "tool-pick"; b.textContent = `${s.ic} /${s.cmd}`;
+    b.title = s.desc; b.dataset.tpl = s.template; w.appendChild(b);
+  }
+  d.appendChild(w); msgs.scrollTop = msgs.scrollHeight;
+}
+function showSlashHelp() {
+  addMsg("a", "Ketik / untuk autocomplete. Contoh: /cv Nama… + data, lalu Enter. Konteks dokumen aktif otomatis terbaca. /tools = daftar klik, /clear = bersihkan chat.");
+}
+msgs.addEventListener("click", (e) => {
+  const b = e.target.closest && e.target.closest(".tool-pick");
+  if (!b) return;
+  $("input").value = b.dataset.tpl + " "; hideSlash(); $("input").focus();
+});
+$("input").addEventListener("input", () => { slashIdx = -1; renderSlash(); });
+$("input").addEventListener("keydown", (e) => {
+  const box = $("slashBox");
+  if (box.hidden) return;
+  const n = box.children.length;
+  if (e.key === "ArrowDown") { e.preventDefault(); slashIdx = (slashIdx + 1) % n; renderSlash(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); slashIdx = (slashIdx - 1 + n) % n; renderSlash(); }
+  else if ((e.key === "Enter" || e.key === "Tab") && slashIdx >= 0) { e.preventDefault(); pickSlash(slashIdx); }
+  else if (e.key === "Escape") { hideSlash(); }
+});
+function expandSlash(raw) {
+  if (!raw.startsWith("/")) return { q: raw };
+  const m = raw.match(/^\/(\S+)\s*([\s\S]*)$/);
+  const cmd = (m[1] || "").toLowerCase(), rest = (m[2] || "").trim();
+  if (cmd === "tools") { renderToolsList(); return { handled: true }; }
+  if (cmd === "help") { showSlashHelp(); return { handled: true }; }
+  if (cmd === "clear") { msgs.innerHTML = ""; return { handled: true }; }
+  const hit = SLASH.find((s) => s.cmd === cmd);
+  if (hit && hit.template) return { q: (hit.template + " " + rest).trim() };
+  return { q: raw }; // slash tak dikenal → kirim mentah ke AI
+}
 
 // Settings BYOK + registry provider dinamis (config/providers.json + custom lokal).
 const S = (k, v) => v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v);
@@ -129,13 +215,15 @@ async function refreshCtx(force) {
 $("form").onsubmit = async (e) => {
   e.preventDefault(); if (busy) return;
   const q = $("input").value.trim(); if (!q) return;
-  $("input").value = ""; addMsg("u", q); busy = true;
+  $("input").value = ""; hideSlash(); addMsg("u", q); busy = true;
+  const ex = expandSlash(q); if (ex.handled) { busy = false; return; } // /tools /help /clear
+  const q2 = ex.q; // slash command → template + konteks user
   const thinking = addMsg("a", "…");
   try {
     await refreshCtx(false);
     const ctx = await buildContext(manifest);
     const ai = await lazyAI();
-    const res = await ai.ask(q, ctx, streamTo(thinking));
+    const res = await ai.ask(q2, ctx, streamTo(thinking));
     thinking.textContent = res.alasan_singkat || "Siap.";
     if (res.preview) { $("diffBefore").textContent = (ctx.l1.seleksi || "(kosong)").slice(0, 600); $("diffAfter").textContent = res.preview.slice(0, 600); $("diffBox").hidden = false; }
     pendingOps = res.ops || [];
@@ -195,9 +283,26 @@ $("btnDiscard").onclick = () => { pendingOps = null; $("diffBox").hidden = true;
 let idleT = null;
 function armIdle() { clearInterval(idleT); idleT = setInterval(() => { if (!$("app").classList.contains("collapsed")) refreshCtx(false); }, 15000); }
 
+// Theme-aware: ikuti tema Word (OfficeTheme) bila ada, fallback ke system theme.
+function normHex(c) { if (!c) return null; c = String(c).trim(); if (/^[0-9a-fA-F]{6}$/.test(c)) return "#" + c; return /^#[0-9a-fA-F]{6}$/.test(c) ? c : null; }
+function lum(hex) { const n = parseInt(hex.slice(1), 16); return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; }
+function applyTheme() {
+  const root = document.documentElement;
+  let bg = null, fg = null;
+  try { const t = Office.context.officeTheme || {}; bg = normHex(t.bodyBackgroundColor); fg = normHex(t.bodyForegroundColor); } catch (e) {}
+  if (!bg && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) { bg = "#1e1e1e"; fg = "#e8e8e8"; }
+  if (bg) {
+    root.style.setProperty("--bg", bg);
+    const dark = lum(bg) < 0.5;
+    document.getElementById("app").dataset.theme = dark ? "dark" : "light";
+    root.style.setProperty("--fg", fg || (dark ? "#e8e8e8" : "#1b1b1b"));
+  }
+  try { if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme); } catch (e) {}
+}
+
 Office.onReady((info) => {
   if (info.host !== Office.HostType.Word) { addMsg("sys", "Buka di Word untuk memakai DocAssist."); return; }
-  loadSettings(); addMsg("a", "Halo! Saya asisten operasional dokumen. Pilih chip atau ketik perintah.");
+  applyTheme(); loadSettings(); addMsg("a", "Halo! Saya asisten operasional dokumen. Ketik / untuk melihat perintah.");
   try { Office.addin.onVisibilityModeChanged(async (args) => { if (args.visibilityMode === "hidden") clearInterval(idleT); else armIdle(); }); } catch (e) {}
   // Render dulu, kerja berat di idle (TTI cepat).
   const boot = () => { refreshCtx(false); armIdle(); };

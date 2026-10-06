@@ -1,6 +1,7 @@
 /* DocAssist — CSS ringan, non-intrusif. Default 330px (min Word Web). Tanpa framework. */
 :root{--w:330px;--bg:#fff;--fg:#1b1b1b;--mut:#6b7280;--acc:#2563eb;--line:#e5e7eb}
 *{box-sizing:border-box}html,body{margin:0;height:100%;font:13px/1.45 system-ui,Segoe UI,Roboto,sans-serif;color:var(--fg)}
+[hidden]{display:none!important}
 #app{height:100vh}#pane{display:flex;flex-direction:column;height:100%;width:var(--w);max-width:100vw;background:var(--bg)}
 #rail{display:none;align-items:center;gap:4px;padding:6px}
 #app.collapsed #pane{display:none}#app.collapsed #rail{display:flex}

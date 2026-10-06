@@ -28,7 +28,7 @@ function closeSettings() { $("settings").hidden = true; $("backdrop").hidden = t
 $("btnSettings").onclick = openSettings;
 $("btnCloseSettings").onclick = closeSettings;
 $("backdrop").onclick = closeSettings;
-$("backdrop").onclick = closeSettings;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeSettings(); hideSlash(); } });
 
 // Slash commands ala Hermes/opencode: "/" → autocomplete, "/tools" → daftar klik di chat.
 const SLASH = [

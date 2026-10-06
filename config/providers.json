@@ -17,7 +17,7 @@
       "label": "Google Gemini (gratis)",
       "style": "gemini",
       "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-      "models": ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.7-flash"],
+      "models": ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3-flash-preview"],
       "keyUrl": "https://aistudio.google.com/apikey",
       "keyPlaceholder": "AIza…",
       "notes": "Gratis tanpa kartu (limit tampil di AI Studio, ±10 RPM/20 RPD). Model 2.x dibatasi untuk pengguna lama — proyek baru pakai 3.8/3.5-Lite. Data free-tier dipakai training di luar EEA/UK."

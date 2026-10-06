@@ -3,8 +3,8 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:type="TaskPaneApp">
-  <Id>7b6e2a10-docassist-4c8a-9f01-000000000001</Id>
-  <Version>0.1.0</Version>
+  <Id>f87ed71d-c451-4aa9-a9e0-baff31864bd7</Id>
+  <Version>1.0.0</Version>
   <ProviderName>DocAssist</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="DocAssist AI"/>
@@ -21,6 +21,7 @@
     <AppDomain>https://api.cerebras.ai</AppDomain>
     <AppDomain>https://api.mistral.ai</AppDomain>
     <AppDomain>https://router.huggingface.co</AppDomain>
+    <AppDomain>https://api.sambanova.ai</AppDomain>
     <AppDomain>https://integrate.api.nvidia.com</AppDomain>
     <AppDomain>https://text.pollinations.ai</AppDomain>
     <AppDomain>https://api.deepseek.com</AppDomain>
@@ -34,7 +35,7 @@
   <Requirements><Sets DefaultMinVersion="1.1"><Set Name="WordApi" MinVersion="1.1"/></Sets></Requirements>
   <DefaultSettings><SourceLocation DefaultValue="https://rizaptk.github.io/docassist/src/taskpane/taskpane.html"/></DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes" xsi:type="VersionOverridesV1_0">
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xsi:type="VersionOverridesV1_0">
     <Hosts><Host xsi:type="Document">
       <DesktopFormFactor>
         <GetStarted><Title resid="GetStarted.Title"/><Description resid="GetStarted.Desc"/><LearnMoreUrl resid="GetStarted.Url"/></GetStarted>
@@ -42,6 +43,7 @@
         <ExtensionPoint xsi:type="PrimaryCommandSurface">
           <OfficeTab id="TabHome"><Group id="DocAssist.Group">
             <Label resid="Group.Label"/>
+            <Icon><bt:Image size="16" resid="Icon.16"/><bt:Image size="32" resid="Icon.32"/><bt:Image size="80" resid="Icon.80"/></Icon>
             <Control xsi:type="Button" id="DocAssist.Toggle">
               <Label resid="Toggle.Label"/><Supertip><Title resid="Toggle.Title"/><Description resid="Toggle.Desc"/></Supertip>
               <Icon><bt:Image size="16" resid="Icon.16"/><bt:Image size="32" resid="Icon.32"/><bt:Image size="80" resid="Icon.80"/></Icon>
@@ -57,17 +59,17 @@
       </DesktopFormFactor>
     </Host></Hosts>
     <Resources>
-      <bt:Images xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
+      <bt:Images xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
         <bt:Image id="Icon.16" DefaultValue="https://rizaptk.github.io/docassist/assets/icon-16.png"/>
         <bt:Image id="Icon.32" DefaultValue="https://rizaptk.github.io/docassist/assets/icon-32.png"/>
         <bt:Image id="Icon.80" DefaultValue="https://rizaptk.github.io/docassist/assets/icon-80.png"/>
       </bt:Images>
-      <bt:Urls xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
+      <bt:Urls xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
         <bt:Url id="Pane.Url" DefaultValue="https://rizaptk.github.io/docassist/src/taskpane/taskpane.html"/>
         <bt:Url id="Commands.Url" DefaultValue="https://rizaptk.github.io/docassist/src/taskpane/commands.html"/>
         <bt:Url id="GetStarted.Url" DefaultValue="https://rizaptk.github.io/docassist/docs/PANDUAN_INSTALL.html"/>
       </bt:Urls>
-      <bt:ShortStrings xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
+      <bt:ShortStrings xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
         <bt:String id="GetStarted.Title" DefaultValue="DocAssist siap."/>
         <bt:String id="Group.Label" DefaultValue="DocAssist"/>
         <bt:String id="Toggle.Label" DefaultValue="AI Asisten"/>
@@ -75,7 +77,7 @@
         <bt:String id="Toggle.Title" DefaultValue="Buka/tutup asisten AI"/>
         <bt:String id="Collapse.Title" DefaultValue="Mode strip hemat tempat"/>
       </bt:ShortStrings>
-      <bt:LongStrings xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes">
+      <bt:LongStrings xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0">
         <bt:String id="GetStarted.Desc" DefaultValue="Chat widget ringan, tidak mengganggu dokumen."/>
         <bt:String id="Toggle.Desc" DefaultValue="Tampilkan panel chat 330px yang bisa dilipat."/>
         <bt:String id="Collapse.Desc" DefaultValue="Lipat jadi strip ikon agar tidak intrusif."/>

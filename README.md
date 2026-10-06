@@ -3,7 +3,7 @@
 Add-on MS Word ringan yang menjadi **asisten operasional dokumen**: format, buat, ubah, edit, tambah, dan desain dokumen langsung dari **chat widget kecil** yang tidak mengganggu kerja.
 
 - 🆓 **Gratis**: tanpa server, hosting statis. Live di `https://rizaptk.github.io/docassist/`.
-- 🔑 **BYOK multi-provider**: Gemini, Groq, NVIDIA NIM, OpenRouter :free, Cerebras, Mistral, Hugging Face, Pollinations (tanpa daftar), Ollama lokal — plus OpenAI/DeepSeek/Claude berbayar. Daftar di `config/providers.json`, user tinggal pilih + isi key. Daftar model bisa di-browse langsung dari key.
+- 🔑 **BYOK multi-provider**: Gemini 3.8, Groq, NVIDIA NIM, SambaNova, OpenRouter :free, Mistral, Hugging Face, Pollinations (tanpa daftar), Ollama lokal — plus OpenAI/DeepSeek/Claude berbayar. Daftar di `config/providers.json`, user tinggal pilih + isi key. Daftar model bisa di-browse langsung dari key.
 - 🪶 **Ringan**: tanpa framework, tanpa build step — HTML/CSS/JS murni + Office.js.
 - 🧠 **Hemat token**: konteks berlapis + cache ringkasan AI (DocManifest).
 - 🛡️ **Anti-slop**: AI mengembalikan operasi minimal-diff + pratinjau sebelum diterapkan.
@@ -85,7 +85,7 @@ Panduan instal detail: [`docs/PANDUAN_INSTALL.md`](./docs/PANDUAN_INSTALL.md)
 | Office 2021 LTSC | ⚠️ Sebagian | Core + visual jalan; shapes/pageSetup tergantung build |
 | Office 2019 / 2016 | ⚠️ Inti jalan | Chat, tabel, gambar, CV, OOXML, cache (WordApi 1.1–1.3). Nonaktif otomatis: komentar (butuh 1.4), shapes/PageSetup (butuh Desktop set) |
 
-Manifest memakai lantai `WordApi 1.1` (tanpa SharedRuntime wajib) agar bisa dipasang di Office 2016+. Semua fitur di atas lantai itu dibatasi saat runtime (`isSetSupported` + `try/catch` + fallback collapse) — add-in tidak crash di versi lama, hanya fiturnya yang nonaktif dengan pesan jujur.
+Manifest memakai lantai `WordApi 1.1` (tanpa SharedRuntime wajib) agar bisa dipasang di Office 2016+. Semua fitur di atas lantai itu dibatasi saat runtime (`isSetSupported` + `try/catch` + fallback collapse) — add-in tidak crash di versi lama, hanya fiturnya yang nonaktif dengan pesan jujur. Word lawas yang menolak blok ribbon → pakai **`manifest-legacy.xml`** (tanpa VersionOverrides; taskpane via Insert → My Add-ins → Add).
 
 > **Perlu install WordApi? Tidak.** `WordApi`/Office.js dimuat otomatis dari CDN Microsoft
 > (`appsforoffice.microsoft.com`) setiap panel dibuka — selalu versi terbaru, tanpa install/update

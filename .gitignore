@@ -4,3 +4,5 @@ dist/
 *.log
 .DS_Store
 Thumbs.db
+# Artefak uji sideload lokal (salinan manifest + varian uji, jangan di-commit)
+catalog/

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DocAssist — Add-in only manifest, sideload manual. Ganti rizaptk.github.io/docassist dengan URL hosting statis kamu. -->
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:type="TaskPaneApp">
+  <Id>41f21cb4-45ec-4a8a-8a4b-d63346ce17e8</Id>
+  <Version>1.0.0</Version>
+  <ProviderName>DocAssist</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="DocAssist"/>
+  <Description DefaultValue="Asisten operasional Word TANPA tombol ribbon (untuk Word lawas): buka via Insert>My Add-ins>Add."/>
+  <IconUrl DefaultValue="https://rizaptk.github.io/docassist/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://rizaptk.github.io/docassist/assets/icon-80.png"/>
+  <SupportUrl DefaultValue="https://rizaptk.github.io/docassist/docs/PANDUAN_INSTALL.html"/>
+  <AppDomains>
+    <AppDomain>https://rizaptk.github.io/docassist</AppDomain>
+    <AppDomain>https://api.openai.com</AppDomain>
+    <AppDomain>https://generativelanguage.googleapis.com</AppDomain>
+    <AppDomain>https://api.groq.com</AppDomain>
+    <AppDomain>https://openrouter.ai</AppDomain>
+    <AppDomain>https://api.cerebras.ai</AppDomain>
+    <AppDomain>https://api.mistral.ai</AppDomain>
+    <AppDomain>https://router.huggingface.co</AppDomain>
+    <AppDomain>https://integrate.api.nvidia.com</AppDomain>
+    <AppDomain>https://text.pollinations.ai</AppDomain>
+    <AppDomain>https://api.deepseek.com</AppDomain>
+    <AppDomain>https://api.anthropic.com</AppDomain>
+    <!-- Ollama lokal (Word Desktop). Tambahkan domain provider custom lain di sini. -->
+    <AppDomain>http://localhost:11434</AppDomain>
+    <AppDomain>https://cdn.jsdelivr.net</AppDomain>
+  </AppDomains>
+  <Hosts><Host Name="Document"/></Hosts>
+  <!-- Lantai install: WordApi 1.1 agar bisa dipasang di Office 2016+. Fitur baru (komentar=1.4, shapes/PageSetup=Desktop) dibatasi saat runtime via isSetSupported/try-catch. SharedRuntime TIDAK wajib agar 2016/2019 bisa install; hide()/visibility auto-fallback ke collapse. -->
+  <Requirements><Sets DefaultMinVersion="1.1"><Set Name="WordApi" MinVersion="1.1"/></Sets></Requirements>
+  <DefaultSettings><SourceLocation DefaultValue="https://rizaptk.github.io/docassist/src/taskpane/taskpane.html"/></DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+</OfficeApp>

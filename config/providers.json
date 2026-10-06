@@ -1,6 +1,6 @@
 {
-  "_comment": "DocAssist provider registry — FILE KHUSUS persistence daftar provider AI. Admin/user boleh edit manual (tambah provider OpenAI-compatible cukup 5 baris), commit ke git, user lain otomatis dapat daftarnya. Custom per-perangkat via UI disimpan di localStorage dan digabung saat runtime. style: openai = POST {baseUrl}{chatPath||/chat/completions} (Bearer/SSE); gemini = POST {baseUrl}/models/{model}:generateContent?key=; anthropic = POST {baseUrl}/v1/messages (x-api-key). Riset batas gratis: Okt 2026, ringkas di notes tiap provider; daftar model :free berputar — user bisa ketik ID baru langsung di kolom Model.",
-  "version": 2,
+  "_comment": "DocAssist provider registry. Riset ulang Okt 2026: Gemini 3.8/3.5-Lite (2.x dibatasi), Groq gpt-oss+qwen3.8, OpenRouter :free (daftar berputar), Cerebras jadi trial+kartu, Mistral $10/bln, HF kredit kecil, SambaNova gratis baru. Daftar model = saran awal; user bisa ketik ID baru langsung di kolom Model.",
+  "version": 3,
   "providers": [
     {
       "id": "openai",
@@ -17,60 +17,70 @@
       "label": "Google Gemini (gratis)",
       "style": "gemini",
       "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-      "models": ["gemini-2.0-flash", "gemini-2.5-flash"],
+      "models": ["gemini-3.8-flash", "gemini-3.5-flash-lite", "gemini-3.7-flash"],
       "keyUrl": "https://aistudio.google.com/apikey",
       "keyPlaceholder": "AIza…",
-      "notes": "Gratis tanpa kartu (±1500 req/hari, 10 RPM). Rekomendasi utama gratis."
+      "notes": "Gratis tanpa kartu (limit tampil di AI Studio, ±10 RPM/20 RPD). Model 2.x dibatasi untuk pengguna lama — proyek baru pakai 3.8/3.5-Lite. Data free-tier dipakai training di luar EEA/UK."
     },
     {
       "id": "groq",
       "label": "Groq (gratis, cepat)",
       "style": "openai",
       "baseUrl": "https://api.groq.com/openai/v1",
-      "models": ["llama-3.3-70b-versatile", "openai/gpt-oss-20b", "openai/gpt-oss-120b"],
+      "models": ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"],
       "keyUrl": "https://console.groq.com/keys",
       "keyPlaceholder": "gsk_…",
-      "notes": "Gratis tanpa kartu (±30 RPM, ±1K req/hari per model). CORS terbuka — bisa dari browser."
+      "notes": "Gratis tanpa kartu (±30 RPM, ±1K req/hari; yang mengikat ±8K token/mnt). CORS terbuka — bisa dari browser."
     },
     {
       "id": "openrouter",
       "label": "OpenRouter :free (gratis)",
       "style": "openai",
       "baseUrl": "https://openrouter.ai/api/v1",
-      "models": ["openrouter/free", "qwen/qwen3.8-27b:free", "google/gemma-4-31b-it:free", "thinkingmachines/inkling-small:free", "nvidia/nemotron-3.5-lightning:free", "cohere/north-mini-code:free"],
+      "models": ["openrouter/free", "thinkingmachines/inkling-small:free", "qwen/qwen3.8-27b:free", "google/gemma-4-31b-it:free", "nvidia/nemotron-3-ultra-550b-a55b:free", "cohere/north-mini-code:free"],
       "keyUrl": "https://openrouter.ai/keys",
       "keyPlaceholder": "sk-or-…",
       "notes": "Model :free $0/token, tanpa kartu. Batas 20 RPM + 50 req/hari (1000/hari bila pernah beli $10 kredit). Daftar berputar; openrouter/free = router otomatis."
     },
     {
       "id": "cerebras",
-      "label": "Cerebras (gratis, kuota besar)",
+      "label": "Cerebras (trial + kartu)",
       "style": "openai",
       "baseUrl": "https://api.cerebras.ai/v1",
       "models": ["gpt-oss-120b"],
       "keyUrl": "https://inference.cerebras.ai/",
       "keyPlaceholder": "csk-…",
-      "notes": "Klaim ±1Jt token/hari, 30 RPM. Cek ketentuan terbaru — dok resmi menyebut perlu payment terverifikasi untuk aktivasi API."
+      "notes": "Sejak 2026: trial $5/30 hari dan perlu payment method (±5 RPM). Bukan free tier permanen."
     },
     {
       "id": "mistral",
-      "label": "Mistral (mode gratis)",
+      "label": "Mistral (kredit bulanan)",
       "style": "openai",
       "baseUrl": "https://api.mistral.ai/v1",
       "models": ["mistral-small-latest", "mistral-large-latest"],
       "keyUrl": "https://console.mistral.ai/api-keys/",
       "keyPlaceholder": "…",
-      "notes": "Free mode untuk evaluasi (verifikasi HP, tanpa kartu). Batas per-workspace, cek dashboard."
+      "notes": "Free plan = $10 kredit API per bulan. Matikan training opt-out sebelum request pertama."
     },
     {
       "id": "huggingface",
-      "label": "Hugging Face (gratis)",
+      "label": "Hugging Face (kredit kecil)",
       "style": "openai",
       "baseUrl": "https://router.huggingface.co/v1",
       "models": ["meta-llama/Llama-3.1-8B-Instruct", "deepseek-ai/DeepSeek-V3-0324", "openai/gpt-oss-120b:fastest"],
       "keyUrl": "https://huggingface.co/settings/tokens",
       "keyPlaceholder": "hf_…",
-      "notes": "Butuh token HF (permission Inference Providers). Format model bisa provider:model:policy — cek docs HF terbaru."
+      "notes": "Kredit gratis kecil (±$0.10/bln shared). Format model provider:model:policy — cek docs HF terbaru."
+    },
+    {
+      "id": "sambanova",
+      "label": "SambaNova (gratis)",
+      "style": "openai",
+      "baseUrl": "https://api.sambanova.ai/v1",
+      "models": ["DeepSeek-V3.1", "Meta-Llama-3.3-70B-Instruct", "gpt-oss-120b"],
+      "keyUrl": "https://cloud.sambanova.ai/",
+      "keyPlaceholder": "…",
+      "notes": "Free tier tanpa kartu (±20 RPM, 20 req + 200K token/hari per model). ID model cek katalog SambaNova."
     },
     {
       "id": "nvidia",

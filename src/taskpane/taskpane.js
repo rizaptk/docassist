@@ -23,8 +23,8 @@ function streamTo(el) { return (tok) => { rafQ += tok; if (rafOn) return; rafOn 
 $("btnCollapse").onclick = () => $("app").classList.add("collapsed");
 $("btnExpand").onclick = () => $("app").classList.remove("collapsed");
 $("btnHide").onclick = async () => { try { await Office.addin.hide(); } catch (e) { $("app").classList.add("collapsed"); } };
-function openSettings() { $("settings").hidden = false; $("backdrop").hidden = false; }
-function closeSettings() { $("settings").hidden = true; $("backdrop").hidden = true; }
+function openSettings() { const s = $("settings"); s.classList.add("open"); s.hidden = false; const b = $("backdrop"); b.classList.add("open"); b.hidden = false; }
+function closeSettings() { const s = $("settings"); s.classList.remove("open"); s.hidden = true; const b = $("backdrop"); b.classList.remove("open"); b.hidden = true; }
 $("btnSettings").onclick = openSettings;
 $("btnCloseSettings").onclick = closeSettings;
 $("backdrop").onclick = closeSettings;
@@ -179,6 +179,7 @@ function loadSettings() { // sinkron dulu (cat cepat), registry menyusul async
 }
 $("sProvider").onchange = () => { S("docassist:provider", $("sProvider").value); $("sModel").value = ""; paintProvider(); };
 $("sKey").onchange = () => { S("docassist:key", $("sKey").value); refreshModelList(); };
+$("sModel").onfocus = (e) => e.target.select(); // klik → pilih semua, dropdown tampil penuh
 $("sModel").onchange = () => S("docassist:model", $("sModel").value);
 $("sTemp").onchange = () => S("docassist:temp", $("sTemp").value);
 $("btnAddProv").onclick = async () => {

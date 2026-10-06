@@ -19,6 +19,10 @@ export function esc(s) {
   return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// flat: label berupa objek → gabung values. Anti "[object Object]" di shapes.
+const flat = (v) => Array.isArray(v) ? v.map(flat).filter(Boolean).join(", ")
+  : (v && typeof v === "object" ? Object.values(v).map(flat).filter(Boolean).join(" — ") : String(v ?? ""));
+
 function normShape(s) { return GEOM[s] ? s : "process"; }
 
 // Rank = longest-path dari root, tahan cycle (relaksasi ≤ N pass).
@@ -26,7 +30,7 @@ export function layoutFlow(flow) {
   const raw = flow.nodes || [];
   if (!raw.length) throw new Error("flowchart butuh ≥1 node");
   if (raw.length > 20) throw new Error("maks 20 node untuk mode editable (lebih → gunakan gambar)");
-  const nodes = raw.map((n, i) => ({ id: String(n.id ?? "n" + (i + 1)), label: String(n.label ?? "").slice(0, 60), shape: normShape(n.shape) }));
+  const nodes = raw.map((n, i) => ({ id: String(n.id ?? "n" + (i + 1)), label: flat(n.label).slice(0, 60), shape: normShape(n.shape) }));
   const ids = new Set(nodes.map((n) => n.id));
   const edges = (flow.edges || []).filter((e) => ids.has(String(e.from)) && ids.has(String(e.to))).slice(0, 30)
     .map((e) => ({ from: String(e.from), to: String(e.to), label: String(e.label ?? "").slice(0, 24) }));

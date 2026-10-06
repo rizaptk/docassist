@@ -10,7 +10,8 @@ Parameter tiap tool: tulis_ganti/sisip_setelah {teks}; terapkan_style {style}; b
 5. Deskripsi alur/proses/langkah (≤12 node) → buat_flowchart_native {nodes:[{id,label,shape}], edges:[{from,to,label}]}. shape: start|process|decision|input|terminator|end. Label singkat (≤8 kata). Kondisi cabang tulis di label edge ("Ya"/"Tidak").
 6. Alur kompleks (>12 node) → buat_flowchart (mermaid, gambar, fallback).
 7. Data tabular/angka yang dipaste → buat_chart (parse jadi headers+rows, pilih bar/line) + opsional buat_tabel untuk data sumber.
-8. CV/lamaran → buat_cv {template:"cv-ats"|"cv-modern", data:{nama,kontak,ringkasan,pengalaman:[{jabatan,perusahaan,periode,poin:[]}],pendidikan:[],skills:[]}}; surat lamaran → buat_cover_letter {data:{nama,kontak,perusahaan,posisi,sumber,isi,kota,tanggal}}; cek kelolosan ATS → cek_ats {}.
+8. CV: buat_cv {template, data:{nama,kontak,ringkasan,pengalaman:[{jabatan,perusahaan,periode,poin:[]}],pendidikan:[],skills:[]}}. template: cv-ats (lamaran formal/ATS, default) | cv-modern | cv-style1 Executive Teal | cv-style2 Classic Navy | cv-style3 Modern Peach | cv-style4 Navy Sidebar. User tulis "styleN" → pakai itu; surat lamaran → buat_cover_letter {data, style samakan dgn CV}; cek ATS → cek_ats {}. nama = nama orang (BUKAN nomor/email); gabung email•telp•kota di kontak.
+9. Desain premium, bukan generik: 1 warna aksen (biru tua) + teks gelap; hierarki jelas; spasi lega; TANPA emoji/clip-art di dokumen; MAKS 2 gaya font. Konten CV: kata kerja aksi + angka hasil HANYA bila ada di data — JANGAN mengarang angka/pengalaman.
 Tools valid: tulis_ganti, sisip_setelah, terapkan_style, buat_tabel, cari_ganti, buat_flowchart, buat_flowchart_native, buat_chart, kotak_teks, buat_cv, buat_cover_letter, cek_ats.`;
 
 export const TOOLS = [
@@ -23,8 +24,8 @@ export const TOOLS = [
   { name: "buat_flowchart_native", desc: "Flowchart EDITABLE (shapes natif, default)", params: { nodes: [{ id: "a", label: "Mulai", shape: "start" }], edges: [{ from: "a", to: "b", label: "Ya" }] } },
   { name: "buat_chart", desc: "Chart dari data paste → gambar + opsional tabel", params: { chartType: "bar|line", title: "s", headers: [], rows: [[]] } },
   { name: "kotak_teks", desc: "Kotak/shape natif (Word Desktop saja)", params: { teks: "s", bentuk: "Rectangle" } },
-  { name: "buat_cv", desc: "Generate CV dari data (ATS/modern)", params: { template: "cv-ats|cv-modern", data: {} } },
-  { name: "buat_cover_letter", desc: "Surat lamaran formal Indonesia", params: { data: {} } },
+  { name: "buat_cv", desc: "Generate CV (ats/modern/style1-4 premium)", params: { template: "cv-ats|cv-modern|cv-style1|cv-style2|cv-style3|cv-style4", data: {} } },
+  { name: "buat_cover_letter", desc: "Surat lamaran (style samakan dgn CV)", params: { data: {}, style: "style1..style4" } },
   { name: "cek_ats", desc: "Audit struktur dokumen untuk kelolosan ATS", params: {} },
 ];
 

@@ -4,32 +4,35 @@
 
 const s = (v) => String(v ?? "").trim();
 const BUL = "• ";
+// flat: objek {jenjang,sekolah,tahun} → "jenjang — sekolah — tahun". Anti "[object Object]".
+const flat = (v) => Array.isArray(v) ? v.map(flat).filter(Boolean).join(", ")
+  : (v && typeof v === "object" ? Object.values(v).map(flat).filter(Boolean).join(" — ") : s(v));
 
 // Normalisasi data CV dari AI (toleran field hilang).
 export function normCv(d = {}) {
   const exp = (d.pengalaman || []).map((e) => ({
-    jabatan: s(e.jabatan), perusahaan: s(e.perusahaan), periode: s(e.periode),
-    poin: (e.poin || []).map(s).filter(Boolean).slice(0, 6),
+    jabatan: flat(e.jabatan), perusahaan: flat(e.perusahaan), periode: flat(e.periode),
+    poin: (e.poin || []).map(flat).filter(Boolean).slice(0, 6),
   })).filter((e) => e.jabatan || e.perusahaan).slice(0, 8);
   return {
-    nama: s(d.nama), kontak: s(d.kontak), ringkasan: s(d.ringkasan),
+    nama: flat(d.nama), kontak: flat(d.kontak), ringkasan: flat(d.ringkasan),
     pengalaman: exp,
-    pendidikan: (d.pendidikan || []).map(s).filter(Boolean).slice(0, 5),
-    skills: (d.skills || []).map(s).filter(Boolean).slice(0, 20),
+    pendidikan: (d.pendidikan || []).map(flat).filter(Boolean).slice(0, 5),
+    skills: (d.skills || []).map(flat).filter(Boolean).slice(0, 20),
   };
 }
 
-function sek(ops, judul) { ops.push({ tool: "sisip_blok", teks: judul, style: "Heading 2" }); }
+function sek(ops, judul) { ops.push({ tool: "sisip_blok", teks: judul, style: "Heading 2", font: { bold: true, color: "2E74B5" } }); }
 
 export function buildCvAts(d) {
   const v = normCv(d), ops = [];
-  ops.push({ tool: "sisip_blok", teks: v.nama || "Nama Lengkap", style: "Heading 1" });
+  ops.push({ tool: "sisip_blok", teks: v.nama || "Nama Lengkap", style: "Heading 1", font: { bold: true, color: "1F3864", size: 26 } });
   if (v.kontak) ops.push({ tool: "sisip_blok", teks: v.kontak, style: "Normal" });
   if (v.ringkasan) { sek(ops, "Ringkasan"); ops.push({ tool: "sisip_blok", teks: v.ringkasan, style: "Normal" }); }
   if (v.pengalaman.length) {
     sek(ops, "Pengalaman Kerja");
     for (const e of v.pengalaman) {
-      ops.push({ tool: "sisip_blok", teks: [e.jabatan, e.perusahaan, e.periode].filter(Boolean).join(" — "), style: "Heading 3" });
+      ops.push({ tool: "sisip_blok", teks: [e.jabatan, e.perusahaan, e.periode].filter(Boolean).join(" — "), style: "Heading 3", font: { bold: true } });
       for (const p of e.poin) ops.push({ tool: "sisip_blok", teks: BUL + p, style: "Normal" });
     }
   }
@@ -45,16 +48,16 @@ export function buildCvModern(d) {
     const rows = [["Kategori", "Detail"]];
     const half = Math.ceil(v.skills.length / 2);
     rows.push(["Teknis", v.skills.slice(0, half).join(", ")], ["Pendukung", v.skills.slice(half).join(", ") || "-"]);
-    ops.push({ tool: "sisip_blok", teks: "Matriks Keahlian", style: "Heading 2" });
-    ops.push({ tool: "buat_tabel", rows: 3, cols: 2, data: rows });
+    ops.push({ tool: "sisip_blok", teks: "Matriks Keahlian", style: "Heading 2", font: { bold: true, color: "2E74B5" } });
+    ops.push({ tool: "buat_tabel", rows: 3, cols: 2, data: rows, head: { color: "1F4E79" } });
   }
   return ops;
 }
 
 export function buildCoverLetter(d = {}) {
   const ops = [], v = {
-    nama: s(d.nama), kontak: s(d.kontak), perusahaan: s(d.perusahaan),
-    posisi: s(d.posisi), sumber: s(d.sumber), isi: s(d.isi), kota: s(d.kota), tanggal: s(d.tanggal),
+    nama: flat(d.nama), kontak: flat(d.kontak), perusahaan: flat(d.perusahaan),
+    posisi: flat(d.posisi), sumber: flat(d.sumber), isi: flat(d.isi), kota: flat(d.kota), tanggal: flat(d.tanggal),
   };
   if (v.kota || v.tanggal) ops.push({ tool: "sisip_blok", teks: [v.kota, v.tanggal].filter(Boolean).join(", "), style: "Normal" });
   ops.push({ tool: "sisip_blok", teks: "Yth. HRD " + (v.perusahaan || "[Nama Perusahaan]"), style: "Normal" });

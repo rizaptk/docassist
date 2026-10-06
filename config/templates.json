@@ -16,15 +16,51 @@
       "label": "CV Modern (tabel skill)",
       "builder": "CvBuilder.buildCvModern",
       "desktopOnly": false,
-      "desc": "Struktur ATS + tabel keahlian rapi untuk dikirim langsung ke HRD."
+      "desc": "Struktur ATS + aksen premium (nama besar biru tua, section beraksen, tabel skill) untuk dikirim ke HRD."
     },
     {
       "id": "cover-letter",
       "jenis": "surat",
       "label": "Cover Letter / Surat Lamaran",
-      "builder": "CvBuilder.buildCoverLetter",
+      "builder": "CvBuilder.buildCoverLetter + CvStyles.buildCoverStyled",
       "desktopOnly": false,
-      "desc": "Surat lamaran formal Bahasa Indonesia dari data pelamar + lowongan."
+      "desc": "Surat lamaran formal Bahasa Indonesia; tambah style style1-4 untuk kop ber-aksen senada CV."
+    },
+    {
+      "id": "cv-style1",
+      "jenis": "cv",
+      "label": "CV Executive Teal",
+      "builder": "CvStyles.buildCvStyled",
+      "desktopOnly": false,
+      "atsSafe": false,
+      "desc": "Header band teal + foto placeholder + sidebar abu. Premium, non-ATS."
+    },
+    {
+      "id": "cv-style2",
+      "jenis": "cv",
+      "label": "CV Classic Navy",
+      "builder": "CvStyles.buildCvStyled",
+      "desktopOnly": false,
+      "atsSafe": false,
+      "desc": "Foto + nama serif navy + divider + sidebar. Premium, non-ATS."
+    },
+    {
+      "id": "cv-style3",
+      "jenis": "cv",
+      "label": "CV Modern Peach",
+      "builder": "CvStyles.buildCvStyled",
+      "desktopOnly": false,
+      "atsSafe": false,
+      "desc": "Nama tengah + bar kontak hitam + sidebar peach. Premium, non-ATS."
+    },
+    {
+      "id": "cv-style4",
+      "jenis": "cv",
+      "label": "CV Navy Sidebar",
+      "builder": "CvStyles.buildCvStyled",
+      "desktopOnly": false,
+      "atsSafe": false,
+      "desc": "Sidebar navy penuh teks putih. Premium, non-ATS."
     }
   ]
 }

@@ -16,7 +16,7 @@ Add-on MS Word ringan yang menjadi **asisten operasional dokumen**: format, buat
 | Slash commands | `/rapikan /cv /flowchart…` + autocomplete, `/tools` daftar klik — chat full-height |
 | BYOK multi-provider | 12 provider + custom, browse model dari key, Test koneksi |
 | 19 tools Word atomik | Teks, tabel, visual, flowchart editable, CV, cover letter, cek ATS |
-| Template kits | Registry `config/templates.json` + builder (CV ATS/modern, cover letter) |
+| Template kits | Registry `config/templates.json`: CV ATS/modern + 4 style premium editable + cover letter ber-aksen |
 | Flowchart editable | Shapes DrawingML natif (teks bisa diedit di Word), fallback gambar otomatis |
 | Chart dari data | Paste tabel/angka → grafik batang/garis + tabel sumber |
 | DocManifest cache | Ringkasan AI ikut tersimpan di `.docx` (CustomXmlParts) |

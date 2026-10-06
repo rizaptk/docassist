@@ -58,11 +58,18 @@ export async function terapkanStyle(style) {
   }));
 }
 
-export async function buatTabel(rows, cols, data) {
+export async function buatTabel(rows, cols, data, head) {
   return tryCatch(() => run(async (ctx) => {
     const r = ctx.document.getSelection();
     const t = r.insertTable(rows, cols, Word.InsertLocation.after, data || undefined);
-    t.headerRowCount = 1; t.style = "Table Grid"; await ctx.sync(); return true;
+    t.headerRowCount = 1; t.style = "Table Grid"; await ctx.sync();
+    try { // header premium (bold + aksen): best-effort, gagal diam-diam di build lama
+      t.rows.load("items"); await ctx.sync();
+      const cells = t.rows.items[0].cells; cells.load("items"); await ctx.sync();
+      for (const c of cells.items) c.body.font.set({ bold: true, color: (head && head.color) || "1F4E79" });
+      await ctx.sync();
+    } catch (e) {}
+    return true;
   }));
 }
 
@@ -83,10 +90,12 @@ export async function tambahKomentar(teks) {
 }
 
 // Sisip 1 paragraf blok bergaya di AKHIR dokumen (untuk hasil generate: CV, artikel, surat).
-export async function sisipBlok(teks, style = "Normal") {
+// font opsional {bold,color,size} untuk aksen premium; gagal di build lama → ditelan tryCatch.
+export async function sisipBlok(teks, style = "Normal", font) {
   return tryCatch(() => run(async (ctx) => {
     const p = ctx.document.body.insertParagraph(teks || "", Word.InsertLocation.end);
     if (style && style !== "Normal") p.style = style;
+    if (font) p.font.set(font);
     await ctx.sync(); return true;
   }));
 }
@@ -148,9 +157,9 @@ export async function execSatu(op) {
   if (!op || !op.tool) return false;
   if (op.tool === "tulis_ganti") return !!(await tulisGanti(op.teks || ""));
   else if (op.tool === "sisip_setelah") return !!(await sisipSetelah(op.teks || ""));
-  else if (op.tool === "sisip_blok") return !!(await sisipBlok(op.teks || "", op.style || "Normal"));
+  else   if (op.tool === "sisip_blok") return !!(await sisipBlok(op.teks || "", op.style || "Normal", op.font));
   else if (op.tool === "terapkan_style") return !!(await terapkanStyle(op.style || "Normal"));
-  else if (op.tool === "buat_tabel") return !!(await buatTabel(op.rows || 3, op.cols || 3, op.data));
+  else if (op.tool === "buat_tabel") return !!(await buatTabel(op.rows || 3, op.cols || 3, op.data, op.head));
   else if (op.tool === "cari_ganti") return !!(await cariGanti(op.dari || "", op.ke || ""));
   else if (op.tool === "sisip_gambar") return !!(await sisipGambarBase64(op.base64 || "", op.caption || ""));
   else if (op.tool === "kotak_teks") { const r = await kotakNative(op.teks || "", op.bentuk || "Rectangle"); if (r && r.reason) console.warn(r.reason); return r === true || !!(r && r.ok); }
@@ -183,8 +192,16 @@ export async function execSatu(op) {
   }
   else if (op.tool === "buat_cv" || op.tool === "buat_cover_letter") {
     const B = await import("./Builders/CvBuilder.js"); // lazy: hanya saat kit karir diminta
+    const tpl = String(op.template || op.style || "");
+    const S = (tpl.startsWith("cv-style") || (op.tool === "buat_cover_letter" && op.style))
+      ? await import("./Builders/CvStyles.js") : null;
+    if (S) { // premium OOXML editable; gagal → fallback teks ATS di bawah
+      const xml = tpl.startsWith("cv-style") ? S.buildCvStyled(tpl, op.data) : S.buildCoverStyled(op.data, op.style);
+      if (await sisipOoxml(xml) === true) return true;
+      console.warn("[DocAssist] styled gagal, fallback teks");
+    }
     const subs = op.tool === "buat_cv"
-      ? (op.template === "cv-modern" ? B.buildCvModern(op.data) : B.buildCvAts(op.data))
+      ? (tpl === "cv-modern" ? B.buildCvModern(op.data) : B.buildCvAts(op.data))
       : B.buildCoverLetter(op.data);
     let n = 0;
     for (const sub of subs) if (await execSatu(sub)) n++;

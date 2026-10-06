@@ -86,6 +86,10 @@ const cvOps = CB.buildCvAts({ nama: "Budi", kontak: "budi@x.id", pengalaman: [{ 
 a.equal(cvOps[0].tool, "sisip_blok"); a.equal(cvOps[0].style, "Heading 1"); a.equal(cvOps[0].teks, "Budi");
 a.ok(cvOps.some((o) => o.teks.startsWith("• Melayani")), "poin jadi bullet");
 a.ok(CB.buildCvModern({ skills: ["a", "b", "c"] }).some((o) => o.tool === "buat_tabel"), "modern + tabel skill");
+a.ok(!JSON.stringify(CB.buildCvAts({ pendidikan: [{ jenjang: "SMK", sekolah: "SMK A", tahun: "2020" }], skills: [{ nama: "Coding" }] })).includes("[object Object]"), "objek ter-flatten");
+const premium = CB.buildCvModern({ nama: "Budi", skills: ["a"] });
+a.ok(premium[0].font && premium[0].font.color === "1F3864", "nama aksen premium");
+a.ok(premium.some((o) => o.tool === "buat_tabel" && o.head && o.head.color), "tabel bawa head premium");
 const cl = CB.buildCoverLetter({ nama: "Budi", posisi: "Kasir" });
 a.ok(cl.length >= 4 && cl.every((o) => o.tool === "sisip_blok"), "cover letter = blok");
 a.equal(CB.auditVerdict({ images: 0, textboxes: 0, tables: 0, columns: false }).lolos, true);
@@ -111,3 +115,19 @@ a.equal(r.ops[0].tool, "cari_ganti"); a.equal(r.ops[0].dari, "x");
 r = N({ ops: [{ foo: 1 }] });
 a.equal(r.ops.length, 0, "op tanpa nama tool dibuang");
 console.log("smoke OK: normOps toleran — semua lolos");
+
+// CvStyles premium: 4 layout OOXML valid + escaping + tanpa object-Object.
+const CS = await import("../src/core/Builders/CvStyles.js");
+const demo = { nama: "Budi & Co", kontak: "budi@x.id", ringkasan: "Teknisi", pengalaman: [{ jabatan: "Teknisi", perusahaan: "PT A", periode: "2020", poin: ["Baik"] }], pendidikan: ["SMK"], skills: ["Las"] };
+for (const id of CS.STYLE_IDS) {
+  const xml = CS.buildCvStyled(id, demo);
+  a.ok(xml.includes("w:tbl"), id + " ada tabel");
+  a.ok(xml.includes("Budi &amp; Co"), id + " escaping");
+  a.ok(!xml.includes("[object Object]"), id + " tanpa object-Object");
+}
+a.ok(CS.buildCvStyled("cv-style1", demo).includes('w:fill="0E5F5B"'), "teal accent");
+a.ok(CS.buildCvStyled("cv-style4", demo).includes('w:fill="1E3A5F"'), "navy sidebar");
+a.ok(CS.buildCvStyled("ngaco", demo).includes("0E5F5B"), "fallback style1");
+const cov = CS.buildCoverStyled({ nama: { depan: "Budi" } }, "style2");
+a.ok(cov.includes('w:fill="1E3A5F"') && cov.includes("Budi") && !cov.includes("[object Object]"), "cover aksen + flat");
+console.log("smoke OK: CV styles premium — semua lolos");

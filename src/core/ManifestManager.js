@@ -26,12 +26,27 @@ export async function loadManifest() {
 }
 
 export function saveManifestLocal(m) { mem = m; clearTimeout(saveT); saveT = setTimeout(persist, 600); }
+let lastWrite = 0;
 async function persist() {
   if (!mem) return;
   mem.updatedAt = new Date().toISOString();
   try { localStorage.setItem(LS_KEY, JSON.stringify(mem)); } catch (e) {}
-  // Tulis ke dokumen di idle agar tidak blokir ketikan user.
-  const write = () => Office.context.document.customXmlParts.addAsync(`<docassist><m>${JSON.stringify(mem)}</m></docassist>`, { namespace: NS }, () => {});
+  if (Date.now() - lastWrite < 30000) return; // throttle tulis dokumen: maks 1x/30 dtk
+  lastWrite = Date.now();
+  // Tulis ke dokumen di idle agar tidak blokir ketikan user; hapus part lama dulu anti-bengkak.
+  const write = () => {
+    try {
+      Office.context.document.customXmlParts.getByNamespaceAsync(NS, (r) => {
+        const parts = (r.status === Office.AsyncResultStatus.Succeeded && r.value) || [];
+        let i = 0;
+        const next = () => {
+          if (i < parts.length) { const p = parts[i++]; try { p.deleteAsync(() => next()); } catch (e) { next(); } }
+          else { try { Office.context.document.customXmlParts.addAsync(`<docassist><m>${JSON.stringify(mem)}</m></docassist>`, { namespace: NS }, () => {}); } catch (e) {} }
+        };
+        next();
+      });
+    } catch (e) {}
+  };
   if ("requestIdleCallback" in window) requestIdleCallback(write, { timeout: 2000 }); else setTimeout(write, 800);
 }
 

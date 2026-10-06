@@ -38,7 +38,7 @@ const SLASH = [
   { cmd: "formal", ic: "🎓", desc: "Formal-kan tanpa ubah makna", template: "Formal-kan tanpa ubah makna." },
   { cmd: "flowchart", ic: "🔀", desc: "Flowchart editable dari alur", template: "Buatkan flowchart yang bisa diedit dari alur berikut: " },
   { cmd: "chart", ic: "📊", desc: "Chart dari data paste", template: "Buatkan chart dari data berikut (paste tabel/angka): " },
-  { cmd: "cv", ic: "📄", desc: "CV ATS-friendly dari data", template: "Buatkan CV ATS-friendly dari data berikut (nama, kontak, pengalaman, pendidikan, skill): " },
+  { cmd: "cv", ic: "📄", desc: "CV: ats/modern/style1-4", template: "Buatkan CV (style: ats/modern/style1/style2/style3/style4, default ats) dari data: " },
   { cmd: "cek-ats", ic: "✅", desc: "Audit kelolosan ATS dokumen", template: "Cek apakah dokumen ini lolos ATS, beri saran perbaikan." },
   { cmd: "tools", ic: "🧰", desc: "Tampilkan daftar tools", template: "" },
   { cmd: "help", ic: "❓", desc: "Bantuan slash command", template: "" },
@@ -292,7 +292,7 @@ $("btnDiscard").onclick = () => { pendingOps = null; $("diffBox").hidden = true;
 
 // Pause background saat pane hidden (jangan ganggu Word).
 let idleT = null;
-function armIdle() { clearInterval(idleT); idleT = setInterval(() => { if (!$("app").classList.contains("collapsed")) refreshCtx(false); }, 15000); }
+function armIdle() { clearInterval(idleT); idleT = setInterval(() => { if (busy) return; if (!$("app").classList.contains("collapsed")) refreshCtx(false); }, 30000); }
 
 // Theme-aware: ikuti tema Word (OfficeTheme) bila ada, fallback ke system theme.
 function normHex(c) { if (!c) return null; c = String(c).trim(); if (/^[0-9a-fA-F]{6}$/.test(c)) return "#" + c; return /^#[0-9a-fA-F]{6}$/.test(c) ? c : null; }

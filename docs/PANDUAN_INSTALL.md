@@ -81,3 +81,4 @@ tiap ubah ribbon harus reinstall).
 3. Alternatif termudah: **Word Web** (office.com) → dokumen baru → Insert → Add-ins → Upload → pilih `manifest.xml`.
 4. Keluar dari **Compatibility Mode** dulu: **File → Info → Convert** (atau Save As → `.docx`). Add-in paling stabil di format `.docx` modern.
 5. **Word lawas menolak ribbon** (manifest terdaftar tapi tidak muncul di SHARED FOLDER, padahal manifest minimal muncul): gunakan **`manifest-legacy.xml`** — sama persis tanpa blok VersionOverrides/ribbon. Taskpane dibuka via Insert → My Add-ins → Add (bukan tombol ribbon). Terbukti jalan di Office Home & Student 2016 (Okt 2026).
+6. **Panel menampilkan versi lama setelah update**: tutup panel → Insert → My Add-ins → SHARED FOLDER → Add ulang (paksa muat dari server). URL entry taskpane berversi (`?v=...`, naik tiap rilis) agar WebView tidak pakai cache lama.
